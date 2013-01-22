@@ -1,0 +1,36 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@drawable/bg_login" >
+
+    <Button
+        android:id="@+id/regButton"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/loginButton"
+        android:layout_marginLeft="@dimen/button_margin_left"
+        android:layout_marginRight="@dimen/button_margin_right"
+        android:enabled="false"
+        android:text="@string/register" />
+
+    <Button
+        android:id="@+id/loginButton"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_marginLeft="@dimen/button_margin_left"
+        android:layout_marginRight="@dimen/button_margin_right"
+        android:enabled="false"
+        android:text="@string/login" />
+
+    <Button
+        android:id="@+id/singlePlayButton"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/loginButton"
+        android:layout_marginLeft="@dimen/button_margin_left"
+        android:layout_marginRight="@dimen/button_margin_right"
+        android:text="@string/single_play" />
+
+</RelativeLayout>

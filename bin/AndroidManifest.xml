@@ -1,0 +1,42 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.oneguy.qipai.hall"
+    android:versionCode="1"
+    android:versionName="1.0" >
+
+    <uses-sdk
+        android:minSdkVersion="3"
+        android:targetSdkVersion="3" />
+
+    <application
+        android:name="com.oneguy.qipai.qianfen.QianfenApplication"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
+        <activity
+            android:name=".HallActivity"
+            android:label="@string/title_activity_hall" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.oneguy.qipai.qianfen.QianfenActivity"
+            android:configChanges="orientation|locale|keyboard"
+            android:screenOrientation="landscape" >
+            <intent-filter>
+                <action android:name="com.oneguy.qianfen" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.oneguy.qipai.qianfen.GameActivity"
+            android:configChanges="orientation|locale|keyboard"
+            android:screenOrientation="landscape"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen" >
+        </activity>
+    </application>
+
+</manifest>
