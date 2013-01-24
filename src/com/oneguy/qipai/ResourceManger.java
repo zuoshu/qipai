@@ -10,13 +10,10 @@ import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Rect;
-import android.support.v4.util.LruCache;
 import android.util.Log;
 import android.view.View;
 
-import com.oneguy.qipai.BuildConfig;
-import com.oneguy.qipai.R;
+import com.oneguy.qipai.entity.CardInfo;
 import com.oneguy.qipai.view.Poker;
 
 public final class ResourceManger {
@@ -25,9 +22,9 @@ public final class ResourceManger {
 	private Resources mResources;
 	// Default memory cache size
 	private static final int DEFAULT_MEM_CACHE_SIZE = 1024 * 1024 * 5; // 5MB
-	private LruCache<String, Bitmap> mMemCache;
+	// private LruCache<String, Bitmap> mMemCache;
 	private HashMap<String, Integer> mCardFaceResMap;
-	private boolean isImageCached;
+	// private boolean isImageCached;
 
 	// 屏幕信息
 	public int displayWidth;
@@ -54,28 +51,26 @@ public final class ResourceManger {
 	public int startButtonMarginTop;
 
 	// 所有的扑克 108张
+	private static HashMap<String, CardInfo> mCardInfo;
 	private static ArrayList<Poker> mPokers;
 
 	public synchronized static ResourceManger getInstance() {
 		if (mInstance == null) {
 			mInstance = new ResourceManger();
 		}
-		if (!mInstance.isImageCached) {
-			mInstance.isImageCached = true;
-			mInstance.computeSize();
-			mInstance.initResources();
-		}
 		return mInstance;
 	}
 
 	private ResourceManger() {
 		mResources = QianfenApplication.getInstance().getResources();
-		mMemCache = new LruCache<String, Bitmap>(DEFAULT_MEM_CACHE_SIZE);
+		// mMemCache = new LruCache<String, Bitmap>(DEFAULT_MEM_CACHE_SIZE);
 		mPokers = new ArrayList<Poker>(Constants.CARD_COUNT);
+		mCardInfo = new HashMap<String, CardInfo>(Constants.CARD_COUNT);
 		displayWidth = QianfenApplication.displayWidth;
 		displayHeight = QianfenApplication.displayHeight;
-		isImageCached = false;
+		// isImageCached = false;
 		mCardFaceResMap = new HashMap<String, Integer>(Constants.CARD_COUNT);
+		initResources();
 	}
 
 	private void computeSize() {
@@ -128,128 +123,124 @@ public final class ResourceManger {
 		if (BuildConfig.DEBUG) {
 			Log.d(TAG, "initResources");
 		}
-		// putResource(Constants.DECK_BACKGROUND, R.drawable.deck_background);
-		// putResource(Constants.CARD, R.drawable.lord_card_backface_big);
-		// putResource(Constants.CARD_SELECTED, R.drawable.card_selected);
-		// putCardFaceImage();
-		storeCardFaceResString();
-		// generatePokers();
-		isImageCached = true;
+		computeSize();
+		storeCardBitmapId();
+		prepareCards();
 	}
 
-	// 将所有扑克先保存下来
-	private void generatePokers() {
+	private void prepareCards() {
+		// 两副牌
+		for (int i = 0; i < 2; i++) {
+			prepareCard(Constants.CARD_SPADE_1);
+			prepareCard(Constants.CARD_SPADE_2);
+			prepareCard(Constants.CARD_SPADE_3);
+			prepareCard(Constants.CARD_SPADE_4);
+			prepareCard(Constants.CARD_SPADE_5);
+			prepareCard(Constants.CARD_SPADE_6);
+			prepareCard(Constants.CARD_SPADE_7);
+			prepareCard(Constants.CARD_SPADE_8);
+			prepareCard(Constants.CARD_SPADE_9);
+			prepareCard(Constants.CARD_SPADE_10);
+			prepareCard(Constants.CARD_SPADE_11);
+			prepareCard(Constants.CARD_SPADE_12);
+			prepareCard(Constants.CARD_SPADE_13);
+
+			prepareCard(Constants.CARD_HEART_1);
+			prepareCard(Constants.CARD_HEART_2);
+			prepareCard(Constants.CARD_HEART_3);
+			prepareCard(Constants.CARD_HEART_4);
+			prepareCard(Constants.CARD_HEART_5);
+			prepareCard(Constants.CARD_HEART_6);
+			prepareCard(Constants.CARD_HEART_7);
+			prepareCard(Constants.CARD_HEART_8);
+			prepareCard(Constants.CARD_HEART_9);
+			prepareCard(Constants.CARD_HEART_10);
+			prepareCard(Constants.CARD_HEART_11);
+			prepareCard(Constants.CARD_HEART_12);
+			prepareCard(Constants.CARD_HEART_13);
+
+			prepareCard(Constants.CARD_CLUB_1);
+			prepareCard(Constants.CARD_CLUB_2);
+			prepareCard(Constants.CARD_CLUB_3);
+			prepareCard(Constants.CARD_CLUB_4);
+			prepareCard(Constants.CARD_CLUB_5);
+			prepareCard(Constants.CARD_CLUB_6);
+			prepareCard(Constants.CARD_CLUB_7);
+			prepareCard(Constants.CARD_CLUB_8);
+			prepareCard(Constants.CARD_CLUB_9);
+			prepareCard(Constants.CARD_CLUB_10);
+			prepareCard(Constants.CARD_CLUB_11);
+			prepareCard(Constants.CARD_CLUB_12);
+			prepareCard(Constants.CARD_CLUB_13);
+
+			prepareCard(Constants.CARD_DIAMOND_1);
+			prepareCard(Constants.CARD_DIAMOND_2);
+			prepareCard(Constants.CARD_DIAMOND_3);
+			prepareCard(Constants.CARD_DIAMOND_4);
+			prepareCard(Constants.CARD_DIAMOND_5);
+			prepareCard(Constants.CARD_DIAMOND_6);
+			prepareCard(Constants.CARD_DIAMOND_7);
+			prepareCard(Constants.CARD_DIAMOND_8);
+			prepareCard(Constants.CARD_DIAMOND_9);
+			prepareCard(Constants.CARD_DIAMOND_10);
+			prepareCard(Constants.CARD_DIAMOND_11);
+			prepareCard(Constants.CARD_DIAMOND_12);
+			prepareCard(Constants.CARD_DIAMOND_13);
+
+			prepareCard(Constants.CARD_JOKER_BLACK);
+			prepareCard(Constants.CARD_JOKER_RED);
+		}
+	}
+
+	private void prepareCard(String cardFaceName) {
+		if (cardFaceName == null) {
+			return;
+		}
+		String[] names = cardFaceName.split(Constants.CARD_NAME_SPLITTER);
+		if (names == null || names.length < 3) {
+			return;
+		}
 		Context context = QianfenApplication.getInstance();
-		String cardFaceName;
-		String suit;
-		for (int j = 0; j < 2; j++) {
-			// 黑桃
-			suit = Constants.SPADE;
-			for (int i = 1; i < 14; i++) {
-				cardFaceName = Constants.CARD_NAME_PREFIX
-						+ Constants.CARD_NAME_SPLITTER + suit
-						+ Constants.CARD_NAME_SPLITTER + i;
-				mPokers.add(new Poker(context, cardFaceName, cardWidth,
-						cardHeight));
-			}
-			// 红桃
-			suit = Constants.HEART;
-			for (int i = 1; i < 14; i++) {
-				cardFaceName = Constants.CARD_NAME_PREFIX
-						+ Constants.CARD_NAME_SPLITTER + suit
-						+ Constants.CARD_NAME_SPLITTER + i;
-				mPokers.add(new Poker(context, cardFaceName, cardWidth,
-						cardHeight));
-			}
-			// 梅花
-			suit = Constants.CLUB;
-			for (int i = 1; i < 14; i++) {
-				cardFaceName = Constants.CARD_NAME_PREFIX
-						+ Constants.CARD_NAME_SPLITTER + suit
-						+ Constants.CARD_NAME_SPLITTER + i;
-				mPokers.add(new Poker(context, cardFaceName, cardWidth,
-						cardHeight));
-			}
-			// 方块
-			suit = Constants.DIAMOND;
-			for (int i = 1; i < 14; i++) {
-				cardFaceName = Constants.CARD_NAME_PREFIX
-						+ Constants.CARD_NAME_SPLITTER + suit
-						+ Constants.CARD_NAME_SPLITTER + i;
-				mPokers.add(new Poker(context, cardFaceName, cardWidth,
-						cardHeight));
-			}
-			// 两个大小王
-			mPokers.add(new Poker(context, Constants.CARD_JOKER_BLACK,
-					cardWidth, cardHeight));
-			mPokers.add(new Poker(context, Constants.CARD_JOKER_RED, cardWidth,
-					cardHeight));
+		int suit;
+		int count;
+		int order;
+		if (names[1].equals(Constants.SPADE)) {
+			suit = Constants.SUIT_SPADE;
+		} else if (names[1].equals(Constants.HEART)) {
+			suit = Constants.SUIT_HEART;
+		} else if (names[1].equals(Constants.CLUB)) {
+			suit = Constants.SUIT_CLUB;
+		} else if (names[1].equals(Constants.DIAMOND)) {
+			suit = Constants.SUIT_DIAMOND;
+		} else {
+			suit = Constants.SUIT_JOKER;
 		}
-		for (Poker p : mPokers) {
-			p.setVisibility(View.GONE);
+		if (names[2].equals(Constants.RED)) {
+			order = Constants.ORDER_JOKER_RED;
+			count = Constants.COUNT_JOKER_RED;
+		} else if (names[2].equals(Constants.BLACK)) {
+			order = Constants.ORDER_JOKER_BLACK;
+			count = Constants.COUNT_JOKER_BLACK;
+		} else if (names[2].equals(Constants.COUNT_1)) {
+			order = Constants.ORDER_1;
+			count = Integer.valueOf(names[2]);
+		} else if (names[2].equals(Constants.COUNT_2)) {
+			order = Constants.ORDER_2;
+			count = Integer.valueOf(names[2]);
+		} else {
+			order = Integer.valueOf(names[2]);
+			count = Integer.valueOf(names[2]);
 		}
+		int resId = mCardFaceResMap.get(cardFaceName);
+		CardInfo cardInfo = new CardInfo(cardFaceName, suit, count, order);
+		Poker poker = new Poker(context, cardInfo, getBitmap(resId), cardWidth,
+				cardHeight, cardFaceWidth, cardFaceHeight);
+		poker.setVisibility(View.GONE);
+		mCardInfo.put(cardFaceName, cardInfo);
+		mPokers.add(poker);
 	}
 
-	// private void putCardFaceImage() {
-	// // 黑桃
-	// putResource(Constants.CARD_SPADE_1, R.drawable.card_spade_1);
-	// putResource(Constants.CARD_SPADE_2, R.drawable.card_spade_2);
-	// putResource(Constants.CARD_SPADE_3, R.drawable.card_spade_3);
-	// putResource(Constants.CARD_SPADE_4, R.drawable.card_spade_4);
-	// putResource(Constants.CARD_SPADE_5, R.drawable.card_spade_5);
-	// putResource(Constants.CARD_SPADE_6, R.drawable.card_spade_6);
-	// putResource(Constants.CARD_SPADE_7, R.drawable.card_spade_7);
-	// putResource(Constants.CARD_SPADE_8, R.drawable.card_spade_8);
-	// putResource(Constants.CARD_SPADE_9, R.drawable.card_spade_9);
-	// putResource(Constants.CARD_SPADE_10, R.drawable.card_spade_10);
-	// putResource(Constants.CARD_SPADE_11, R.drawable.card_spade_j);
-	// putResource(Constants.CARD_SPADE_12, R.drawable.card_spade_q);
-	// putResource(Constants.CARD_SPADE_13, R.drawable.card_spade_k);
-	// // 红桃
-	// putResource(Constants.CARD_HEART_1, R.drawable.card_heart_1);
-	// putResource(Constants.CARD_HEART_2, R.drawable.card_heart_2);
-	// putResource(Constants.CARD_HEART_3, R.drawable.card_heart_3);
-	// putResource(Constants.CARD_HEART_4, R.drawable.card_heart_4);
-	// putResource(Constants.CARD_HEART_5, R.drawable.card_heart_5);
-	// putResource(Constants.CARD_HEART_6, R.drawable.card_heart_6);
-	// putResource(Constants.CARD_HEART_7, R.drawable.card_heart_7);
-	// putResource(Constants.CARD_HEART_8, R.drawable.card_heart_8);
-	// putResource(Constants.CARD_HEART_9, R.drawable.card_heart_9);
-	// putResource(Constants.CARD_HEART_10, R.drawable.card_heart_10);
-	// putResource(Constants.CARD_HEART_11, R.drawable.card_heart_j);
-	// putResource(Constants.CARD_HEART_12, R.drawable.card_heart_q);
-	// putResource(Constants.CARD_HEART_13, R.drawable.card_heart_k);
-	// // 梅花
-	// putResource(Constants.CARD_CLUB_1, R.drawable.card_club_1);
-	// putResource(Constants.CARD_CLUB_2, R.drawable.card_club_2);
-	// putResource(Constants.CARD_CLUB_3, R.drawable.card_club_3);
-	// putResource(Constants.CARD_CLUB_4, R.drawable.card_club_4);
-	// putResource(Constants.CARD_CLUB_5, R.drawable.card_club_5);
-	// putResource(Constants.CARD_CLUB_6, R.drawable.card_club_6);
-	// putResource(Constants.CARD_CLUB_7, R.drawable.card_club_7);
-	// putResource(Constants.CARD_CLUB_8, R.drawable.card_club_8);
-	// putResource(Constants.CARD_CLUB_9, R.drawable.card_club_9);
-	// putResource(Constants.CARD_CLUB_10, R.drawable.card_club_10);
-	// putResource(Constants.CARD_CLUB_11, R.drawable.card_club_j);
-	// putResource(Constants.CARD_CLUB_12, R.drawable.card_club_q);
-	// putResource(Constants.CARD_CLUB_13, R.drawable.card_club_k);
-	// // 方块
-	// putResource(Constants.CARD_DIAMOND_1, R.drawable.card_diamond_1);
-	// putResource(Constants.CARD_DIAMOND_2, R.drawable.card_diamond_2);
-	// putResource(Constants.CARD_DIAMOND_3, R.drawable.card_diamond_3);
-	// putResource(Constants.CARD_DIAMOND_4, R.drawable.card_diamond_4);
-	// putResource(Constants.CARD_DIAMOND_5, R.drawable.card_diamond_5);
-	// putResource(Constants.CARD_DIAMOND_6, R.drawable.card_diamond_6);
-	// putResource(Constants.CARD_DIAMOND_7, R.drawable.card_diamond_7);
-	// putResource(Constants.CARD_DIAMOND_8, R.drawable.card_diamond_8);
-	// putResource(Constants.CARD_DIAMOND_9, R.drawable.card_diamond_9);
-	// putResource(Constants.CARD_DIAMOND_10, R.drawable.card_diamond_10);
-	// putResource(Constants.CARD_DIAMOND_11, R.drawable.card_diamond_j);
-	// putResource(Constants.CARD_DIAMOND_12, R.drawable.card_diamond_q);
-	// putResource(Constants.CARD_DIAMOND_13, R.drawable.card_diamond_k);
-	// }
-
-	private void storeCardFaceResString() {
+	private void storeCardBitmapId() {
 		mCardFaceResMap.put(Constants.CARD_JOKER_BLACK,
 				R.drawable.card_joker_small);
 		mCardFaceResMap
@@ -349,10 +340,12 @@ public final class ResourceManger {
 	// }
 
 	public Bitmap getBitmap(String name) {
-		if (!isImageCached) {
-			initResources();
-		}
 		int resId = mCardFaceResMap.get(name);
+		Bitmap bitmap = BitmapFactory.decodeResource(mResources, resId);
+		return bitmap;
+	}
+
+	public Bitmap getBitmap(int resId) {
 		Bitmap bitmap = BitmapFactory.decodeResource(mResources, resId);
 		return bitmap;
 	}
@@ -371,8 +364,8 @@ public final class ResourceManger {
 	}
 
 	public void clear() {
-		mMemCache.evictAll();
-		isImageCached = false;
+		// mMemCache.evictAll();
+		// isImageCached = false;
 		mInstance = null;
 	}
 
@@ -385,9 +378,6 @@ public final class ResourceManger {
 	}
 
 	public ArrayList<Poker> getPokers() {
-		if (mPokers.size() == 0) {
-			generatePokers();
-		}
 		return mPokers;
 	}
 

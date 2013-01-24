@@ -15,9 +15,13 @@ public class Event {
 	public static final int TYPE_O_GENERATE_PLAY_INFO_COMPLETE = 5000;
 	public static final int TYPE_O_SHUFFLE_COMPLETE = 5001;// 等待洗牌信息
 
+	// Common 事件
+	public static final int TYPE_C_SHOW_CARDS = 9001;// 玩家出牌
+
 	public static final Event EVENT_IDLE = new Event(TYPE_IDLE, null);
 	public int what;
 	public Object data;
+	public int arg;
 
 	public Event(int what, Object data) {
 		this.what = what;

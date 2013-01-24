@@ -1,4 +1,4 @@
-package com.oneguy.qipai.bean;
+package com.oneguy.qipai.entity;
 
 
 public class CardInfo implements Comparable<CardInfo> {
@@ -10,8 +10,6 @@ public class CardInfo implements Comparable<CardInfo> {
 	private int order;
 	// 名字
 	private String name;
-
-	private int sequence;
 
 	public CardInfo(String name, int suit, int count, int order) {
 		this.name = name;
@@ -56,13 +54,13 @@ public class CardInfo implements Comparable<CardInfo> {
 		return suit * order;
 	}
 
-	public int getSequence() {
-		return sequence;
-	}
-
-	public void setSequence(int sequence) {
-		this.sequence = sequence;
-	}
+	// public Bitmap getCardFace() {
+	// return cardFace;
+	// }
+	//
+	// public void setCardFace(Bitmap cardFace) {
+	// this.cardFace = cardFace;
+	// }
 
 	@Override
 	public int compareTo(CardInfo another) {

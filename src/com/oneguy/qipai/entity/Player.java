@@ -1,4 +1,4 @@
-package com.oneguy.qipai.bean;
+package com.oneguy.qipai.entity;
 
 import java.util.ArrayList;
 import java.util.Collections;
