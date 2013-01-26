@@ -1,4 +1,4 @@
-package com.oneguy.qipai.game;
+package com.oneguy.qipai.game.control;
 
 /**
  * 

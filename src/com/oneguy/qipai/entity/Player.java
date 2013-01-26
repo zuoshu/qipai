@@ -2,6 +2,9 @@ package com.oneguy.qipai.entity;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 
 import android.view.View;
 import android.widget.TextView;
@@ -9,8 +12,8 @@ import android.widget.TextView;
 import com.oneguy.qipai.QianfenApplication;
 import com.oneguy.qipai.R;
 import com.oneguy.qipai.ResourceManger;
+import com.oneguy.qipai.game.ai.DiscardCombo;
 import com.oneguy.qipai.view.Poker;
-import com.oneguy.qipai.view.Stage;
 
 public class Player {
 	// sequence
@@ -24,23 +27,21 @@ public class Player {
 	public static final int SEAT_RIGHT = 1;
 	public static final int SEAT_UP = 2;
 	public static final int SEAT_LEFT = 3;
+	public static final int SEAT_SELF = SEAT_BOTTOM;
 
 	public static final int CARD_COUNT = 27;
 	private int sequence;
 	private int seat;
-	private ArrayList<Poker> cards;
+	private List<Poker> mCards;
 	private int score;
 	private String name;
 	private View mInfoView;
 	private TextView mPlayerName;
 	private TextView mPlayerScore;
 
-	private Stage mStage;
-
-	public Player(Stage stage) {
-		cards = new ArrayList<Poker>(CARD_COUNT);
+	public Player() {
+		mCards = new LinkedList<Poker>();
 		score = 0;
-		mStage = stage;
 	}
 
 	private void generateInfoView(int res) {
@@ -50,16 +51,16 @@ public class Player {
 	}
 
 	public void addCard(Poker c) {
-		cards.add(c);
+		mCards.add(c);
 	}
 
 	public void sortCards() {
-		Collections.sort(cards);
+		Collections.sort(mCards);
 	}
 
 	public void beginMatch() {
 		score = 0;
-		cards.clear();
+		mCards.clear();
 	}
 
 	public int getSequence() {
@@ -102,21 +103,21 @@ public class Player {
 
 	public String toString() {
 		return "name:" + name + " score:" + score + " seat:" + seat
-				+ " sequence:" + sequence + " card:" + cards.size();
+				+ " sequence:" + sequence + " card:" + mCards.size();
 	}
 
 	public void clearCards() {
-		if (cards != null) {
-			cards.clear();
+		if (mCards != null) {
+			mCards.clear();
 		}
 	}
 
 	public String getCardSequence() {
-		if (cards == null) {
+		if (mCards == null) {
 			return "";
 		}
 		StringBuilder sb = new StringBuilder();
-		for (Poker p : cards) {
+		for (Poker p : mCards) {
 			sb.append(p.getCardInfo().getName());
 			sb.append('\n');
 		}
@@ -132,14 +133,14 @@ public class Player {
 		return mInfoView;
 	}
 
-	public ArrayList<Poker> getCards() {
-		return cards;
+	public List<Poker> getCards() {
+		return mCards;
 	}
 
 	public void layoutCards() {
 		ResourceManger resourceManager = ResourceManger.getInstance();
 		if (seat != SEAT_BOTTOM && seat != SEAT_RIGHT && seat != SEAT_UP
-				&& seat != SEAT_LEFT && (cards == null || cards.size() == 0)) {
+				&& seat != SEAT_LEFT && (mCards == null || mCards.size() == 0)) {
 			return;
 		}
 		int startX = 0, endX = 0, y = 0, cardSpacing = 0;
@@ -174,16 +175,40 @@ public class Player {
 		int cardsMaxHorizontalSpacing = resourceManager
 				.getHorizontalDimen(R.string.cards_horizontal_max_spacing);
 		cardSpacing = Math.min(cardsMaxHorizontalSpacing, (endX - startX)
-				/ cards.size());
-		for (int i = 0; i < cards.size(); i++) {
-			cards.get(i).set(startX + i * cardSpacing, y);
+				/ mCards.size());
+		for (int i = 0; i < mCards.size(); i++) {
+			mCards.get(i).set(startX + i * cardSpacing, y);
 		}
 	}
 
 	public void showCards() {
-		for (Poker p : cards) {
+		for (Poker p : mCards) {
 			p.setVisibility(View.VISIBLE);
 			p.bringToFront();
 		}
+	}
+
+	// TODO
+	public void moveCardsToDeck(DiscardCombo discard) {
+		List<CardInfo> cards = discard.getCards();
+		ResourceManger res = ResourceManger.getInstance();
+		HashMap<String, Poker> pokers = res.getPokerMap();
+		for (CardInfo ci : cards) {
+			Poker p = pokers.get(ci.getName());
+			p.setVisibility(View.GONE);
+			p.invalidate();
+			mCards.remove(p);
+		}
+	}
+
+	public void removeCardsFromHand(DiscardCombo discard) {
+		// TODO Auto-generated method stub
+
+	}
+
+	public void discard(DiscardCombo discard) {
+		moveCardsToDeck(discard);
+		removeCardsFromHand(discard);
+		sortCards();
 	}
 }

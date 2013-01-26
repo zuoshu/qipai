@@ -1,4 +1,4 @@
-package com.oneguy.qipai.game;
+package com.oneguy.qipai.game.control;
 
 import java.util.Random;
 
@@ -9,6 +9,7 @@ import android.util.Log;
 
 import com.oneguy.qipai.BuildConfig;
 import com.oneguy.qipai.Constants;
+import com.oneguy.qipai.game.ai.Director;
 
 public class AIOpponent extends Opponent {
 

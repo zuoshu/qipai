@@ -3,7 +3,7 @@ package com.oneguy.qipai.view;
 import android.content.Context;
 import android.widget.RelativeLayout;
 
-import com.oneguy.qipai.game.Director;
+import com.oneguy.qipai.game.ai.Director;
 
 public class Stage extends RelativeLayout {
 

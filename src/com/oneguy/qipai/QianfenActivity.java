@@ -7,8 +7,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 
-import com.oneguy.qipai.R;
-
 public class QianfenActivity extends Activity {
 	Button singlePlay;
 

@@ -2,16 +2,13 @@ package com.oneguy.qipai.view;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
-import com.oneguy.qipai.Constants;
 import com.oneguy.qipai.R;
-import com.oneguy.qipai.ResourceManger;
 import com.oneguy.qipai.entity.CardInfo;
 import com.oneguy.qipai.entity.Player;
 
@@ -53,7 +50,7 @@ public class Poker extends Sprite implements Comparable<Poker> {
 		}
 		switch (event.getAction()) {
 		case MotionEvent.ACTION_DOWN:
-			Log.d(TAG, "onTouchEvent");
+			// Log.d(TAG, "onTouchEvent");
 			setSelected(!mIsSelected);
 		}
 		return true;

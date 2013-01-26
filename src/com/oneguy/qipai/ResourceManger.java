@@ -2,6 +2,7 @@ package com.oneguy.qipai;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -51,8 +52,9 @@ public final class ResourceManger {
 	public int startButtonMarginTop;
 
 	// 所有的扑克 108张
-	private static HashMap<String, CardInfo> mCardInfo;
-	private static ArrayList<Poker> mPokers;
+	private static HashMap<String, Poker> mPokerHashMap;
+
+	// private static ArrayList<Poker> mPokerList;
 
 	public synchronized static ResourceManger getInstance() {
 		if (mInstance == null) {
@@ -64,8 +66,8 @@ public final class ResourceManger {
 	private ResourceManger() {
 		mResources = QianfenApplication.getInstance().getResources();
 		// mMemCache = new LruCache<String, Bitmap>(DEFAULT_MEM_CACHE_SIZE);
-		mPokers = new ArrayList<Poker>(Constants.CARD_COUNT);
-		mCardInfo = new HashMap<String, CardInfo>(Constants.CARD_COUNT);
+		// mPokerList = new ArrayList<Poker>(Constants.CARD_COUNT);
+		mPokerHashMap = new HashMap<String, Poker>(Constants.CARD_COUNT);
 		displayWidth = QianfenApplication.displayWidth;
 		displayHeight = QianfenApplication.displayHeight;
 		// isImageCached = false;
@@ -131,64 +133,118 @@ public final class ResourceManger {
 	private void prepareCards() {
 		// 两副牌
 		for (int i = 0; i < 2; i++) {
-			prepareCard(Constants.CARD_SPADE_1);
-			prepareCard(Constants.CARD_SPADE_2);
-			prepareCard(Constants.CARD_SPADE_3);
-			prepareCard(Constants.CARD_SPADE_4);
-			prepareCard(Constants.CARD_SPADE_5);
-			prepareCard(Constants.CARD_SPADE_6);
-			prepareCard(Constants.CARD_SPADE_7);
-			prepareCard(Constants.CARD_SPADE_8);
-			prepareCard(Constants.CARD_SPADE_9);
-			prepareCard(Constants.CARD_SPADE_10);
-			prepareCard(Constants.CARD_SPADE_11);
-			prepareCard(Constants.CARD_SPADE_12);
-			prepareCard(Constants.CARD_SPADE_13);
+			prepareCard(Constants.CARD_SPADE_1 + Constants.CARD_NAME_SPLITTER
+					+ i);
+			prepareCard(Constants.CARD_SPADE_2 + Constants.CARD_NAME_SPLITTER
+					+ i);
+			prepareCard(Constants.CARD_SPADE_3 + Constants.CARD_NAME_SPLITTER
+					+ i);
+			prepareCard(Constants.CARD_SPADE_4 + Constants.CARD_NAME_SPLITTER
+					+ i);
+			prepareCard(Constants.CARD_SPADE_5 + Constants.CARD_NAME_SPLITTER
+					+ i);
+			prepareCard(Constants.CARD_SPADE_6 + Constants.CARD_NAME_SPLITTER
+					+ i);
+			prepareCard(Constants.CARD_SPADE_7 + Constants.CARD_NAME_SPLITTER
+					+ i);
+			prepareCard(Constants.CARD_SPADE_8 + Constants.CARD_NAME_SPLITTER
+					+ i);
+			prepareCard(Constants.CARD_SPADE_9 + Constants.CARD_NAME_SPLITTER
+					+ i);
+			prepareCard(Constants.CARD_SPADE_10 + Constants.CARD_NAME_SPLITTER
+					+ i);
+			prepareCard(Constants.CARD_SPADE_11 + Constants.CARD_NAME_SPLITTER
+					+ i);
+			prepareCard(Constants.CARD_SPADE_12 + Constants.CARD_NAME_SPLITTER
+					+ i);
+			prepareCard(Constants.CARD_SPADE_13 + Constants.CARD_NAME_SPLITTER
+					+ i);
 
-			prepareCard(Constants.CARD_HEART_1);
-			prepareCard(Constants.CARD_HEART_2);
-			prepareCard(Constants.CARD_HEART_3);
-			prepareCard(Constants.CARD_HEART_4);
-			prepareCard(Constants.CARD_HEART_5);
-			prepareCard(Constants.CARD_HEART_6);
-			prepareCard(Constants.CARD_HEART_7);
-			prepareCard(Constants.CARD_HEART_8);
-			prepareCard(Constants.CARD_HEART_9);
-			prepareCard(Constants.CARD_HEART_10);
-			prepareCard(Constants.CARD_HEART_11);
-			prepareCard(Constants.CARD_HEART_12);
-			prepareCard(Constants.CARD_HEART_13);
+			prepareCard(Constants.CARD_HEART_1 + Constants.CARD_NAME_SPLITTER
+					+ i);
+			prepareCard(Constants.CARD_HEART_2 + Constants.CARD_NAME_SPLITTER
+					+ i);
+			prepareCard(Constants.CARD_HEART_3 + Constants.CARD_NAME_SPLITTER
+					+ i);
+			prepareCard(Constants.CARD_HEART_4 + Constants.CARD_NAME_SPLITTER
+					+ i);
+			prepareCard(Constants.CARD_HEART_5 + Constants.CARD_NAME_SPLITTER
+					+ i);
+			prepareCard(Constants.CARD_HEART_6 + Constants.CARD_NAME_SPLITTER
+					+ i);
+			prepareCard(Constants.CARD_HEART_7 + Constants.CARD_NAME_SPLITTER
+					+ i);
+			prepareCard(Constants.CARD_HEART_8 + Constants.CARD_NAME_SPLITTER
+					+ i);
+			prepareCard(Constants.CARD_HEART_9 + Constants.CARD_NAME_SPLITTER
+					+ i);
+			prepareCard(Constants.CARD_HEART_10 + Constants.CARD_NAME_SPLITTER
+					+ i);
+			prepareCard(Constants.CARD_HEART_11 + Constants.CARD_NAME_SPLITTER
+					+ i);
+			prepareCard(Constants.CARD_HEART_12 + Constants.CARD_NAME_SPLITTER
+					+ i);
+			prepareCard(Constants.CARD_HEART_13 + Constants.CARD_NAME_SPLITTER
+					+ i);
 
-			prepareCard(Constants.CARD_CLUB_1);
-			prepareCard(Constants.CARD_CLUB_2);
-			prepareCard(Constants.CARD_CLUB_3);
-			prepareCard(Constants.CARD_CLUB_4);
-			prepareCard(Constants.CARD_CLUB_5);
-			prepareCard(Constants.CARD_CLUB_6);
-			prepareCard(Constants.CARD_CLUB_7);
-			prepareCard(Constants.CARD_CLUB_8);
-			prepareCard(Constants.CARD_CLUB_9);
-			prepareCard(Constants.CARD_CLUB_10);
-			prepareCard(Constants.CARD_CLUB_11);
-			prepareCard(Constants.CARD_CLUB_12);
-			prepareCard(Constants.CARD_CLUB_13);
+			prepareCard(Constants.CARD_CLUB_1 + Constants.CARD_NAME_SPLITTER
+					+ i);
+			prepareCard(Constants.CARD_CLUB_2 + Constants.CARD_NAME_SPLITTER
+					+ i);
+			prepareCard(Constants.CARD_CLUB_3 + Constants.CARD_NAME_SPLITTER
+					+ i);
+			prepareCard(Constants.CARD_CLUB_4 + Constants.CARD_NAME_SPLITTER
+					+ i);
+			prepareCard(Constants.CARD_CLUB_5 + Constants.CARD_NAME_SPLITTER
+					+ i);
+			prepareCard(Constants.CARD_CLUB_6 + Constants.CARD_NAME_SPLITTER
+					+ i);
+			prepareCard(Constants.CARD_CLUB_7 + Constants.CARD_NAME_SPLITTER
+					+ i);
+			prepareCard(Constants.CARD_CLUB_8 + Constants.CARD_NAME_SPLITTER
+					+ i);
+			prepareCard(Constants.CARD_CLUB_9 + Constants.CARD_NAME_SPLITTER
+					+ i);
+			prepareCard(Constants.CARD_CLUB_10 + Constants.CARD_NAME_SPLITTER
+					+ i);
+			prepareCard(Constants.CARD_CLUB_11 + Constants.CARD_NAME_SPLITTER
+					+ i);
+			prepareCard(Constants.CARD_CLUB_12 + Constants.CARD_NAME_SPLITTER
+					+ i);
+			prepareCard(Constants.CARD_CLUB_13 + Constants.CARD_NAME_SPLITTER
+					+ i);
 
-			prepareCard(Constants.CARD_DIAMOND_1);
-			prepareCard(Constants.CARD_DIAMOND_2);
-			prepareCard(Constants.CARD_DIAMOND_3);
-			prepareCard(Constants.CARD_DIAMOND_4);
-			prepareCard(Constants.CARD_DIAMOND_5);
-			prepareCard(Constants.CARD_DIAMOND_6);
-			prepareCard(Constants.CARD_DIAMOND_7);
-			prepareCard(Constants.CARD_DIAMOND_8);
-			prepareCard(Constants.CARD_DIAMOND_9);
-			prepareCard(Constants.CARD_DIAMOND_10);
-			prepareCard(Constants.CARD_DIAMOND_11);
-			prepareCard(Constants.CARD_DIAMOND_12);
-			prepareCard(Constants.CARD_DIAMOND_13);
+			prepareCard(Constants.CARD_DIAMOND_1 + Constants.CARD_NAME_SPLITTER
+					+ i);
+			prepareCard(Constants.CARD_DIAMOND_2 + Constants.CARD_NAME_SPLITTER
+					+ i);
+			prepareCard(Constants.CARD_DIAMOND_3 + Constants.CARD_NAME_SPLITTER
+					+ i);
+			prepareCard(Constants.CARD_DIAMOND_4 + Constants.CARD_NAME_SPLITTER
+					+ i);
+			prepareCard(Constants.CARD_DIAMOND_5 + Constants.CARD_NAME_SPLITTER
+					+ i);
+			prepareCard(Constants.CARD_DIAMOND_6 + Constants.CARD_NAME_SPLITTER
+					+ i);
+			prepareCard(Constants.CARD_DIAMOND_7 + Constants.CARD_NAME_SPLITTER
+					+ i);
+			prepareCard(Constants.CARD_DIAMOND_8 + Constants.CARD_NAME_SPLITTER
+					+ i);
+			prepareCard(Constants.CARD_DIAMOND_9 + Constants.CARD_NAME_SPLITTER
+					+ i);
+			prepareCard(Constants.CARD_DIAMOND_10
+					+ Constants.CARD_NAME_SPLITTER + i);
+			prepareCard(Constants.CARD_DIAMOND_11
+					+ Constants.CARD_NAME_SPLITTER + i);
+			prepareCard(Constants.CARD_DIAMOND_12
+					+ Constants.CARD_NAME_SPLITTER + i);
+			prepareCard(Constants.CARD_DIAMOND_13
+					+ Constants.CARD_NAME_SPLITTER + i);
 
-			prepareCard(Constants.CARD_JOKER_BLACK);
-			prepareCard(Constants.CARD_JOKER_RED);
+			prepareCard(Constants.CARD_JOKER_BLACK
+					+ Constants.CARD_NAME_SPLITTER + i);
+			prepareCard(Constants.CARD_JOKER_RED + Constants.CARD_NAME_SPLITTER
+					+ i);
 		}
 	}
 
@@ -231,13 +287,15 @@ public final class ResourceManger {
 			order = Integer.valueOf(names[2]);
 			count = Integer.valueOf(names[2]);
 		}
-		int resId = mCardFaceResMap.get(cardFaceName);
+		String cardFaceNameNoTail = cardFaceName.substring(0,
+				cardFaceName.length() - 2);
+		int resId = mCardFaceResMap.get(cardFaceNameNoTail);
 		CardInfo cardInfo = new CardInfo(cardFaceName, suit, count, order);
 		Poker poker = new Poker(context, cardInfo, getBitmap(resId), cardWidth,
 				cardHeight, cardFaceWidth, cardFaceHeight);
 		poker.setVisibility(View.GONE);
-		mCardInfo.put(cardFaceName, cardInfo);
-		mPokers.add(poker);
+		mPokerHashMap.put(cardFaceName, poker);
+		// mPokerList.add(poker);
 	}
 
 	private void storeCardBitmapId() {
@@ -377,8 +435,12 @@ public final class ResourceManger {
 		return Float.valueOf(res);
 	}
 
-	public ArrayList<Poker> getPokers() {
-		return mPokers;
+	public List<Poker> getPokers() {
+		List<Poker> pokerList = new ArrayList<Poker>(mPokerHashMap.size());
+		for (Poker p : mPokerHashMap.values()) {
+			pokerList.add(p);
+		}
+		return pokerList;
 	}
 
 	/**
@@ -401,5 +463,9 @@ public final class ResourceManger {
 	 */
 	public int getHorizontalDimen(int percentResName) {
 		return (int) (displayWidth * getFloatFromString(percentResName));
+	}
+
+	public HashMap<String, Poker> getPokerMap() {
+		return mPokerHashMap;
 	}
 }

@@ -28,7 +28,7 @@ public class Clock extends Button implements Timer {
 				long duration = currentTime - mStartTime;
 
 				if (BuildConfig.DEBUG) {
-					Log.d(TAG, duration + "");
+//					Log.d(TAG, duration + "");
 				}
 
 				mTotalTime -= (currentTime - mLastupdateTime);

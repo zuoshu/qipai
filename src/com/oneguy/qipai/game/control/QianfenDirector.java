@@ -1,7 +1,7 @@
-package com.oneguy.qipai.game;
+package com.oneguy.qipai.game.control;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.List;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -19,7 +19,13 @@ import com.oneguy.qipai.Constants;
 import com.oneguy.qipai.QianfenApplication;
 import com.oneguy.qipai.R;
 import com.oneguy.qipai.ResourceManger;
+import com.oneguy.qipai.entity.CardInfo;
 import com.oneguy.qipai.entity.Player;
+import com.oneguy.qipai.game.Recorder;
+import com.oneguy.qipai.game.ai.AutoPlay;
+import com.oneguy.qipai.game.ai.Director;
+import com.oneguy.qipai.game.ai.DiscardCombo;
+import com.oneguy.qipai.game.ai.Judge;
 import com.oneguy.qipai.view.Clock;
 import com.oneguy.qipai.view.Clock.OnTimeOutListener;
 import com.oneguy.qipai.view.Poker;
@@ -35,16 +41,19 @@ public class QianfenDirector extends Director implements OnClickListener {
 	static final int LEFT = 3;
 	private int mPlayWith;
 	// 0 自己，1右边，2上面，3左边
-	private Player[] players;
+	private Player[] mPlayers;
+	private Context mQianfen;
 	private ResourceManger mResourceManager;
-	private Context mContext;
 	private QianfenStage mStage;
-	private ArrayList<Poker> mPokers;
-	private AI mAI;
+	private List<Poker> mPokers;
+	private AutoPlay mAI;
+	private Judge mJudge;
+	private Recorder mRecorder;
 	// UI refs
 	private Button mStartButton;
 	private Clock mClock;
 	private PlayerTimeOutListener mPlayerTimeOutListener;
+	private boolean mAutoPlay = false;
 
 	// 不能这样出牌
 	private static final int ERROR_INVALID_CARDS = 1;
@@ -61,17 +70,15 @@ public class QianfenDirector extends Director implements OnClickListener {
 		} else {
 			throw new IllegalArgumentException("暂只支持ai玩家");
 		}
+		mResourceManager = ResourceManger.getInstance();
 		mStage = (QianfenStage) getStage();
 		mStage.setDirector(this);
 		getActivity().setContentView(mStage);
-		mContext = QianfenApplication.getInstance();
-		players = new Player[4];
-		players[0] = new Player(mStage);
-		players[1] = new Player(mStage);
-		players[2] = new Player(mStage);
-		players[3] = new Player(mStage);
-		mResourceManager = ResourceManger.getInstance();
-		mAI = new AI(this);
+		mQianfen = QianfenApplication.getInstance();
+		mPlayers = QianfenApplication.players;
+		mJudge = QianfenApplication.judge;
+		mRecorder = QianfenApplication.recorder;
+		mAI = QianfenApplication.autoPlayer;
 		mPlayerTimeOutListener = new PlayerTimeOutListener(Player.SEAT_NONE);
 		initUIRefs();
 		// init complete
@@ -86,7 +93,7 @@ public class QianfenDirector extends Director implements OnClickListener {
 			}
 		}
 		// 开始按钮
-		mStartButton = new Button(mContext);
+		mStartButton = new Button(mActivity);
 		LayoutParams lp = new LayoutParams(LayoutParams.WRAP_CONTENT,
 				LayoutParams.WRAP_CONTENT);
 		lp.leftMargin = mResourceManager
@@ -108,7 +115,7 @@ public class QianfenDirector extends Director implements OnClickListener {
 		mStage.addView(mStartButton);
 
 		// 计时器
-		mClock = new Clock(mContext);
+		mClock = new Clock(mActivity);
 		lp = new LayoutParams(LayoutParams.WRAP_CONTENT,
 				LayoutParams.WRAP_CONTENT);
 		mClock.setLayoutParams(lp);
@@ -176,8 +183,7 @@ public class QianfenDirector extends Director implements OnClickListener {
 				if (BuildConfig.DEBUG) {
 					Log.d(STATUS_TAG, "3.等待玩家出牌：" + mAI.getInActionPlayerSeat());
 				}
-				onEvent(new Event(Event.TYPE_D_WAIT_PLAYER_ACTION,
-						mAI.getInActionPlayerSeat()));
+				waitDiscard();
 			} else if (BuildConfig.DEBUG) {
 				Log.d(TAG, "游戏状态错误，期待：" + Event.TYPE_D_WAIT_SHUFFLE + " 实际:"
 						+ event.what);
@@ -191,25 +197,47 @@ public class QianfenDirector extends Director implements OnClickListener {
 				// 对于每轮出牌的计算和服务器出现不一致，以服务器为准！
 				mAI.setWhoIsFirst(seat);
 			}
-			setClock(mAI.getInActionPlayerSeat());
+			// 如果是自己出牌并且托管，则启动自动出牌
+			if (seat == Player.SEAT_SELF && !mAutoPlay) {
+				setClock(mAI.getInActionPlayerSeat());
+			} else {
+				autoPlay(seat);
+			}
 			break;
-		// 玩家出牌超时
+		// 等待玩家超时
 		case Event.TYPE_D_PLAYER_ACTION_TIME_OUT:
-			int timeoutSeat = (Integer) event.data;
-			int[] cards = mAI.autoPlay(timeoutSeat);
-			Event ev = new Event(Event.TYPE_C_SHOW_CARDS, cards);
-			ev.arg = timeoutSeat;
-			onEvent(ev);
+			// 如果是自己超时，则托管出牌，如果是对手超时，则等待，过30秒后启动掉线检测
+			int seat2 = mAI.getInActionPlayerSeat();
+			if (seat2 == Player.SEAT_BOTTOM) {
+				if (BuildConfig.DEBUG) {
+					Log.d(STATUS_TAG, "玩家出牌超时，托管");
+				}
+				// 单机版先不托管
+				setAutoPlay(true);
+				waitDiscard();
+			} else {
+				// TODO 设定30秒后启动掉线检测
+			}
 			break;
 		// 玩家出牌
-		case Event.TYPE_C_SHOW_CARDS:
-			int seatShowCards = event.arg;
-			int[] cardsShowing = (int[]) event.data;
-			if (mAI.isShowCardsValid(seatShowCards, cardsShowing)) {
-				showPlayerCards(seatShowCards, cardsShowing);
-			} else {
-				showError(ERROR_INVALID_CARDS);
+		case Event.TYPE_C_DISCARD:
+			DiscardCombo discard = (DiscardCombo) event.data;
+			if (BuildConfig.DEBUG) {
+				String str = "player:" + discard.getSeat() + " discard:";
+				for (CardInfo c : discard.getCards()) {
+					str += c.getName() + "|";
+				}
+				Log.d(TAG, str);
 			}
+			playerDiscard(discard);
+			// 通知对手自己已出牌
+			if (discard.getSeat() != Player.SEAT_SELF) {
+				deployEvent(event);
+			}
+			mAI.takeTurns();
+			// 单机版只托管一轮
+			setAutoPlay(false);
+			waitDiscard();
 			break;
 		default:
 			Log.e(TAG, "unhandle event:" + event.what);
@@ -217,25 +245,59 @@ public class QianfenDirector extends Director implements OnClickListener {
 		}
 	}
 
+	private void waitDiscard() {
+		onEvent(new Event(Event.TYPE_D_WAIT_PLAYER_ACTION,
+				mAI.getInActionPlayerSeat()));
+	}
+
+	private void autoPlay(int seat) {
+		List<DiscardCombo> discardList = mAI.discard();
+		// if (BuildConfig.DEBUG) {
+		// String cardStr = "";
+		// for (DiscardCombo combo : discardList) {
+		// List<CardInfo> cards = combo.getCards();
+		// for (CardInfo cardInfo : combo.getCards()) {
+		// cardStr += cardInfo.getName() + '\n';
+		// }
+		// cardStr += "|";
+		// }
+		// Log.d("Discard", " card:" + cardStr);
+		// }
+		if (discardList == null || discardList.size() == 0) {
+			// pass
+			DiscardCombo discard = new DiscardCombo(seat);
+			discard.setAttribute(DiscardCombo.ATTRIBUTE_PASS);
+		} else {
+			DiscardCombo discard = discardList.get(0);
+			onEvent(new Event(Event.TYPE_C_DISCARD, discard));
+		}
+	}
+
+	private void playerDiscard(DiscardCombo discard) {
+		mRecorder.addRecord(discard);
+		Player player = mPlayers[discard.getSeat()];
+		player.discard(discard);
+	}
+
 	private void setPlayerInfo(Object data) {
 		try {
 			JSONObject info = (JSONObject) data;
 			int sequence = info.getInt(Constants.SELF_SEQUENCE);
-			players[BOTTOM].setSequence(sequence);
-			players[BOTTOM].setSeat(Player.SEAT_BOTTOM);
-			players[BOTTOM].setName(info.getString(Constants.SELF_NAME));
+			mPlayers[BOTTOM].setSequence(sequence);
+			mPlayers[BOTTOM].setSeat(Player.SEAT_BOTTOM);
+			mPlayers[BOTTOM].setName(info.getString(Constants.SELF_NAME));
 
-			players[RIGHT].setSequence((++sequence) % 4);
-			players[RIGHT].setSeat(Player.SEAT_RIGHT);
-			players[RIGHT].setName(info.getString(Constants.RIGHT_NAME));
+			mPlayers[RIGHT].setSequence((++sequence) % 4);
+			mPlayers[RIGHT].setSeat(Player.SEAT_RIGHT);
+			mPlayers[RIGHT].setName(info.getString(Constants.RIGHT_NAME));
 
-			players[UP].setSequence((++sequence) % 4);
-			players[UP].setSeat(Player.SEAT_UP);
-			players[UP].setName(info.getString(Constants.UP_NAME));
+			mPlayers[UP].setSequence((++sequence) % 4);
+			mPlayers[UP].setSeat(Player.SEAT_UP);
+			mPlayers[UP].setName(info.getString(Constants.UP_NAME));
 
-			players[LEFT].setSequence((++sequence) % 4);
-			players[LEFT].setSeat(Player.SEAT_LEFT);
-			players[LEFT].setName(info.getString(Constants.LEFT_NAME));
+			mPlayers[LEFT].setSequence((++sequence) % 4);
+			mPlayers[LEFT].setSeat(Player.SEAT_LEFT);
+			mPlayers[LEFT].setName(info.getString(Constants.LEFT_NAME));
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
@@ -253,33 +315,33 @@ public class QianfenDirector extends Director implements OnClickListener {
 				LayoutParams.WRAP_CONTENT);
 		lp.leftMargin = mResourceManager.player0InfoMarginLeft;
 		lp.topMargin = mResourceManager.player0InfoMarginTop;
-		getStage().addView(players[0].getInfoView(), lp);
+		getStage().addView(mPlayers[0].getInfoView(), lp);
 
 		// player1 右边
 		lp = new LayoutParams(LayoutParams.WRAP_CONTENT,
 				LayoutParams.WRAP_CONTENT);
 		lp.leftMargin = mResourceManager.player1InfoMarginLeft;
 		lp.topMargin = mResourceManager.player1InfoMarginTop;
-		getStage().addView(players[1].getInfoView(), lp);
+		getStage().addView(mPlayers[1].getInfoView(), lp);
 
 		// player2 上面
 		lp = new LayoutParams(LayoutParams.WRAP_CONTENT,
 				LayoutParams.WRAP_CONTENT);
 		lp.leftMargin = mResourceManager.player2InfoMarginLeft;
 		lp.topMargin = mResourceManager.player2InfoMarginTop;
-		getStage().addView(players[2].getInfoView(), lp);
+		getStage().addView(mPlayers[2].getInfoView(), lp);
 
 		// player3 左边
 		lp = new LayoutParams(LayoutParams.WRAP_CONTENT,
 				LayoutParams.WRAP_CONTENT);
 		lp.leftMargin = mResourceManager.player3InfoMarginLeft;
 		lp.topMargin = mResourceManager.player3InfoMarginTop;
-		getStage().addView(players[3].getInfoView(), lp);
+		getStage().addView(mPlayers[3].getInfoView(), lp);
 	}
 
 	private void clearPlayerCards() {
 		for (int i = 0; i < 4; i++) {
-			players[i].clearCards();
+			mPlayers[i].clearCards();
 		}
 	}
 
@@ -296,21 +358,25 @@ public class QianfenDirector extends Director implements OnClickListener {
 		Player player;
 		for (int i = 0; i < cards.length; i++) {
 			poker = mPokers.get(cards[i]);
-			player = players[i % 4];
+			player = mPlayers[i % 4];
 			poker.setPlayer(player);
 			player.addCard(poker);
 		}
-		for (Player p : players) {
+		for (Player p : mPlayers) {
 			p.sortCards();
 		}
 
 	}
 
 	private void putHandCardsOntoStage() {
-		for (Player player : players) {
+		for (Player player : mPlayers) {
 			player.showCards();
 			player.layoutCards();
 		}
+	}
+
+	public void setAutoPlay(boolean autoPlay) {
+		mAutoPlay = autoPlay;
 	}
 
 	/**
@@ -370,7 +436,7 @@ public class QianfenDirector extends Director implements OnClickListener {
 	}
 
 	public Player[] getPlayers() {
-		return players;
+		return mPlayers;
 	}
 
 	private void showPlayerCards(int seatShowCards, int[] cardsShowing) {
@@ -386,7 +452,7 @@ public class QianfenDirector extends Director implements OnClickListener {
 	private void logCardsInfoIfDebug() {
 		if (BuildConfig.DEBUG) {
 			for (int i = 0; i < 4; i++) {
-				Log.d(TAG, "player" + i + ":" + players[i].getCardSequence());
+				Log.d(TAG, "player" + i + ":" + mPlayers[i].getCardSequence());
 			}
 		}
 	}
@@ -394,9 +460,9 @@ public class QianfenDirector extends Director implements OnClickListener {
 	private void logPlayerInfoIfDebug() {
 		if (BuildConfig.DEBUG) {
 			Log.d(TAG,
-					players[0].toString() + '\n' + players[1].toString() + '\n'
-							+ players[2].toString() + '\n'
-							+ players[3].toString());
+					mPlayers[0].toString() + '\n' + mPlayers[1].toString()
+							+ '\n' + mPlayers[2].toString() + '\n'
+							+ mPlayers[3].toString());
 		}
 	}
 

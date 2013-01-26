@@ -1,7 +1,11 @@
-package com.oneguy.qipai.game;
+package com.oneguy.qipai.game.ai;
 
 import android.app.Activity;
 
+import com.oneguy.qipai.game.control.Event;
+import com.oneguy.qipai.game.control.EventGenerator;
+import com.oneguy.qipai.game.control.EventListener;
+import com.oneguy.qipai.game.control.Opponent;
 import com.oneguy.qipai.view.Stage;
 
 public abstract class Director extends EventGenerator implements EventListener {
@@ -14,8 +18,8 @@ public abstract class Director extends EventGenerator implements EventListener {
 
 	public abstract void onStop();
 
-	private Stage mStage;
-	private Activity mActivity;
+	protected Stage mStage;
+	protected Activity mActivity;
 	// 对手
 	private Opponent mOpponent;
 

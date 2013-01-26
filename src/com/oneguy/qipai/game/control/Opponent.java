@@ -1,4 +1,6 @@
-package com.oneguy.qipai.game;
+package com.oneguy.qipai.game.control;
+
+import com.oneguy.qipai.game.ai.Director;
 
 
 

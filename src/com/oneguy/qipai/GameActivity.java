@@ -3,10 +3,9 @@ package com.oneguy.qipai;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.Window;
 
-import com.oneguy.qipai.game.Director;
-import com.oneguy.qipai.game.QianfenDirector;
+import com.oneguy.qipai.game.ai.Director;
+import com.oneguy.qipai.game.control.QianfenDirector;
 import com.oneguy.qipai.view.QianfenStage;
 
 public class GameActivity extends Activity {

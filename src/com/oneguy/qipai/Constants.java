@@ -31,7 +31,8 @@ public class Constants {
 	public static final int ORDER_JOKER_BLACK = 19;
 	public static final int ORDER_1 = 14;
 	public static final int ORDER_2 = 15;
-	
+	public static final int ORDER_NONE = 0;
+
 	// 黑桃
 	public static final String CARD_SPADE_1 = "card_spade_1";
 	public static final String CARD_SPADE_2 = "card_spade_2";
@@ -108,11 +109,11 @@ public class Constants {
 	public static final String DEFAULT_RIGHT_NAME = "小红";
 	public static final String DEFAULT_UP_NAME = "小王";
 	public static final String DEFAULT_LEFT_NAME = "小军";
-	
+
 	// 游戏模式
 	public static final String MODE = "mode";
 	public static final String MODE_SIGNLE = "single";
-	
-	// 10秒超时
-	public static final long PLAY_ACTION_TIME_OUT = 10000;
+
+	// 出牌超时
+	public static final long PLAY_ACTION_TIME_OUT = 5000;
 }

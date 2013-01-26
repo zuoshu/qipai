@@ -5,8 +5,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 
-import com.oneguy.qipai.R;
-
 public class HallActivity extends Activity {
 
 	private static final String QIANFEN_ACTION = "com.oneguy.qianfen";
