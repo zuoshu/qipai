@@ -231,7 +231,7 @@ public class QianfenDirector extends Director implements OnClickListener {
 			}
 			playerDiscard(discard);
 			// 通知对手自己已出牌
-			if (discard.getSeat() != Player.SEAT_SELF) {
+			if (discard.getSeat() == Player.SEAT_SELF) {
 				deployEvent(event);
 			}
 			mAI.takeTurns();
@@ -267,6 +267,7 @@ public class QianfenDirector extends Director implements OnClickListener {
 			// pass
 			DiscardCombo discard = new DiscardCombo(seat);
 			discard.setAttribute(DiscardCombo.ATTRIBUTE_PASS);
+			onEvent(new Event(Event.TYPE_C_DISCARD, discard));
 		} else {
 			DiscardCombo discard = discardList.get(0);
 			onEvent(new Event(Event.TYPE_C_DISCARD, discard));
@@ -274,7 +275,7 @@ public class QianfenDirector extends Director implements OnClickListener {
 	}
 
 	private void playerDiscard(DiscardCombo discard) {
-		mRecorder.addRecord(discard);
+		mRecorder.addDiscard(discard);
 		Player player = mPlayers[discard.getSeat()];
 		player.discard(discard);
 	}
@@ -385,7 +386,8 @@ public class QianfenDirector extends Director implements OnClickListener {
 	 * @return 0-3分别代表bottom,right,top,left的玩家
 	 */
 	private int genRandomStart() {
-		return ((int) System.currentTimeMillis()) % 4;
+		return 0;
+//		return ((int) System.currentTimeMillis()) % 4;
 	}
 
 	/**

@@ -1,6 +1,6 @@
 package com.oneguy.qipai.game.control;
 
-public class Event {
+public class Event{
 	public static final int TYPE_IDLE = 9999;
 	// Director事件
 	// 等待获取玩家信息
