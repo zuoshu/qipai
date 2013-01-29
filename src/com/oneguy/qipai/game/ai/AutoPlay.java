@@ -2,6 +2,7 @@ package com.oneguy.qipai.game.ai;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import android.util.Log;
 
@@ -44,13 +45,51 @@ public class AutoPlay {
 	}
 
 	public void takeTurns() {
-		mPlayerSeatInAction = (mPlayerSeatInAction + 1) % 4;
-		if (BuildConfig.DEBUG) {
-			Log.d(TAG, "takeTurns->" + mPlayerSeatInAction);
+		if (isOneRoundFinish()) {
+			mPlayerSeatInAction = pickStartOfNewRound();
+			if (BuildConfig.DEBUG) {
+				Log.d(TAG, "mPlayerSeatInAction->" + mPlayerSeatInAction);
+			}
+		} else {
+			mPlayerSeatInAction = (mPlayerSeatInAction + 1) % 4;
 		}
+
+		// if (BuildConfig.DEBUG) {
+		// Log.d(TAG, "takeTurns->" + mPlayerSeatInAction);
+		// }
 	}
 
-	public List<DiscardCombo> discard() {
+	private boolean isOneRoundFinish() {
+		return mRecorder.getCurrentSequence() == 0;
+	}
+
+	private int pickStartOfNewRound() {
+		DiscardRecord record = mRecorder.getLastRecordNotPass();
+		if (record == null) {
+			if (BuildConfig.DEBUG) {
+				Log.e(TAG, "impossible!getLastRecordNotPass null!");
+			}
+			return 0;
+		}
+		return record.getDiscardCombo().getSeat();
+	}
+
+	public DiscardCombo discard() {
+		List<DiscardCombo> discardList = pickDiscardList();
+		DiscardCombo discard = null;
+		if (discardList == null || discardList.size() == 0) {
+			// pass
+			discard = new DiscardCombo(mPlayerSeatInAction);
+			discard.setAttribute(DiscardCombo.ATTRIBUTE_PASS);
+		} else {
+			Random random = new Random();
+			int index = random.nextInt(discardList.size());
+			discard = discardList.get(index);
+		}
+		return discard;
+	}
+
+	public List<DiscardCombo> pickDiscardList() {
 		List<DiscardCombo> result = new ArrayList<DiscardCombo>();
 		if (mPlayerSeatInAction != Player.SEAT_LEFT
 				&& mPlayerSeatInAction != Player.SEAT_BOTTOM
@@ -95,19 +134,21 @@ public class AutoPlay {
 				flagArrtibute = DiscardCombo.ATTRIBUTE_510K_FAKE;
 				break;
 			case DiscardCombo.ATTRIBUTE_510K_FAKE:
-				pickFake510K(seat, handCard, lastDiscard, result);
+				// all fake 510k are equal,skip pick fake 510k if last discard
+				// is fake 510k
+				if (lastDiscard.getArrtibute() != DiscardCombo.ATTRIBUTE_510K_FAKE) {
+					pickFake510K(seat, handCard, lastDiscard, result);
+				}
 				flagArrtibute = DiscardCombo.ATTRIBUTE_FOUR;
 				break;
 			case DiscardCombo.ATTRIBUTE_FOUR:
 				pickFour(seat, handCard, lastDiscard, result);
 				flagArrtibute = DiscardCombo.ATTRIBUTE_510K_FLUSH_DIAMOND;
 				break;
-
 			case DiscardCombo.ATTRIBUTE_510K_FLUSH_DIAMOND:
 				pickDiamond510K(seat, handCard, lastDiscard, result);
 				flagArrtibute = DiscardCombo.ATTRIBUTE_510K_FLUSH_CLUB;
 				break;
-
 			case DiscardCombo.ATTRIBUTE_510K_FLUSH_CLUB:
 				pickClub510K(seat, handCard, lastDiscard, result);
 				flagArrtibute = DiscardCombo.ATTRIBUTE_510K_FLUSH_HEART;
@@ -120,7 +161,6 @@ public class AutoPlay {
 				pickSpade510K(seat, handCard, lastDiscard, result);
 				flagArrtibute = DiscardCombo.ATTRIBUTE_FIVE;
 				break;
-
 			case DiscardCombo.ATTRIBUTE_FIVE:
 				pickFive(seat, handCard, lastDiscard, result);
 				flagArrtibute = DiscardCombo.ATTRIBUTE_SIX;
@@ -157,7 +197,18 @@ public class AutoPlay {
 
 	private void pickPair(int seat, List<Poker> handCard,
 			DiscardCombo lastDiscard, List<DiscardCombo> result) {
-
+		ArrayList<CardInfo> cards;
+		int lastOrder = lastDiscard.getOrder();
+		for (int i = 0; i < handCard.size() - 1; i++) {
+			if (handCard.get(i).getCardInfo().getCount() == handCard.get(i + 1)
+					.getCardInfo().getCount()
+					&& handCard.get(i).getCardInfo().getOrder() > lastOrder) {
+				cards = new ArrayList<CardInfo>();
+				cards.add(handCard.get(i).getCardInfo());
+				cards.add(handCard.get(i + 1).getCardInfo());
+				result.add(new DiscardCombo(cards, seat));
+			}
+		}
 	}
 
 	private void pickThree(int seat, List<Poker> handCard,

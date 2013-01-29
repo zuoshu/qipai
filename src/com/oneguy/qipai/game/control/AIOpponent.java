@@ -5,6 +5,7 @@ import java.util.Random;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.os.Message;
 import android.util.Log;
 
 import com.oneguy.qipai.BuildConfig;
@@ -19,14 +20,14 @@ public class AIOpponent extends Opponent {
 	// 洗牌时只要知道序号即可
 	private int[] cards;
 
-	public AIOpponent(Director director) {
-		super(director);
+	public AIOpponent() {
+		super();
 		initCards();
 	}
 
 	@Override
-	public void onEvent(Event event) {
-		switch (event.what) {
+	public void onEventMessage(Message msg) {
+		switch (msg.what) {
 		case Event.TYPE_D_WAIT_FOR_PLAYER_INFO:
 			JSONObject info = generatePlayerInfo();
 			if (BuildConfig.DEBUG) {
@@ -85,4 +86,5 @@ public class AIOpponent extends Opponent {
 			}
 		}
 	}
+
 }

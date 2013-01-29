@@ -18,22 +18,22 @@ public class Event{
 	// Common 事件
 	public static final int TYPE_C_DISCARD = 9001;// 玩家出牌
 
-	public static final Event EVENT_IDLE = new Event(TYPE_IDLE, null);
-	public int what;
-	public Object data;
-	public int arg;
+//	public static final Event EVENT_IDLE = new Event(TYPE_IDLE, null);
+//	public int what;
+//	public Object data;
+//	public int arg;
 
-	public Event(int what, Object data) {
-		this.what = what;
-		this.data = data;
-	}
-
-	public Event() {
-		this(0, null);
-	}
-
-	public Event(int what) {
-		this(what, null);
-	}
+//	public Event(int what, Object data) {
+//		this.what = what;
+//		this.data = data;
+//	}
+//
+//	public Event() {
+//		this(0, null);
+//	}
+//
+//	public Event(int what) {
+//		this(what, null);
+//	}
 
 }

@@ -6,23 +6,23 @@ package com.oneguy.qipai.game.control;
  * 
  */
 public class EventGenerator {
-	private Event currentEvent;
-
-	public Event getCurrentEvent() {
-		return currentEvent;
-	}
-
-	public void setCurrentEvent(Event currentEvent) {
-		this.currentEvent = currentEvent;
-	}
-
-	public void setCurrentEvent(int what, Object data) {
-		Event event = new Event(what, data);
-		setCurrentEvent(event);
-	}
-
-	public void setCurrentEvent(int what) {
-		setCurrentEvent(what, null);
-	}
+//	private Event currentEvent;
+//
+//	public Event getCurrentEvent() {
+//		return currentEvent;
+//	}
+//
+//	public void setCurrentEvent(Event currentEvent) {
+//		this.currentEvent = currentEvent;
+//	}
+//
+//	public void setCurrentEvent(int what, Object data) {
+//		Event event = new Event(what, data);
+//		setCurrentEvent(event);
+//	}
+//
+//	public void setCurrentEvent(int what) {
+//		setCurrentEvent(what, null);
+//	}
 
 }

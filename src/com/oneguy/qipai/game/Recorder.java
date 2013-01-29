@@ -74,4 +74,21 @@ public class Recorder {
 		data[3] = mRecords.get(size - 1);
 		return data;
 	}
+
+	public int getCurrentSequence() {
+		return mCurrentSequence;
+	}
+
+	public int getCurrentRouns() {
+		return mCurrentRound;
+	}
+
+	public DiscardRecord getLastRecordNotPass() {
+		for (int i = mRecords.size() - 1; i >= 0; i--) {
+			if (mRecords.get(i).getDiscardCombo().getArrtibute() != DiscardCombo.ATTRIBUTE_PASS) {
+				return mRecords.get(i);
+			}
+		}
+		return null;
+	}
 }

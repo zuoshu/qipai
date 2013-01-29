@@ -1,31 +1,47 @@
 package com.oneguy.qipai.game.control;
 
-import com.oneguy.qipai.game.ai.Director;
+import android.os.Handler;
+import android.os.Message;
 
+public abstract class Opponent implements EventListener {
+	protected Handler mHandler;
+	private Handler directorHandler;
 
+	protected abstract void onEventMessage(Message msg);
 
-public abstract class Opponent extends EventGenerator implements EventListener {
-	private Director mDirector;
-
-	public Opponent(Director director) {
-		mDirector = director;
+	public Opponent() {
+		mHandler = new Handler() {
+			@Override
+			public void handleMessage(Message msg) {
+				onEventMessage(msg);
+			}
+		};
 	}
 
-	public Director getDirector() {
-		return mDirector;
+	public void setDirectorHandler(Handler handler) {
+		directorHandler = handler;
 	}
 
-	public void deployEvent(Event event) {
-		setCurrentEvent(event);
-		mDirector.onEvent(event);
+	public void deployEvent(Message msg) {
+		directorHandler.sendMessage(msg);
 	}
 
 	public void deployEvent(int what, Object data) {
-		Event event = new Event(what, data);
-		deployEvent(event);
+		Message msg = new Message();
+		msg.what = what;
+		msg.obj = data;
+		deployEvent(msg);
 	}
 
 	public void deployEvent(int what) {
 		deployEvent(what, null);
+	}
+
+	public void sendEventMessage(Message message) {
+		mHandler.sendMessage(message);
+	}
+
+	public Handler getHandler() {
+		return mHandler;
 	}
 }
