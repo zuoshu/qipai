@@ -2,11 +2,13 @@ package com.oneguy.qipai.game;
 
 import java.util.ArrayList;
 
-import com.oneguy.qipai.entity.Player;
+import android.util.Log;
+
 import com.oneguy.qipai.game.ai.DiscardCombo;
 import com.oneguy.qipai.game.ai.DiscardRecord;
 
 public class Recorder {
+	private static final String TAG = "Recorder";
 	// 轮到谁出牌
 	private Player[] mPlayers;
 	private ArrayList<DiscardRecord> mRecords;
@@ -75,11 +77,49 @@ public class Recorder {
 		return data;
 	}
 
+	public int countLastRoundScore() {
+		int score = 0;
+		int size = mRecords.size();
+		if (size < 4) {
+			return score;
+		}
+		if (size % 4 == 0) {
+			score += countDiscardRecordScore(mRecords.get(size - 4));
+			score += countDiscardRecordScore(mRecords.get(size - 3));
+			score += countDiscardRecordScore(mRecords.get(size - 2));
+			score += countDiscardRecordScore(mRecords.get(size - 1));
+		}
+		return score;
+	}
+
+	private int countDiscardRecordScore(DiscardRecord record) {
+		int score = 0;
+		if (record == null || record.getDiscardCombo() == null) {
+			return score;
+		}
+		int att = record.getDiscardCombo().getArrtibute();
+		if (att == DiscardCombo.ATTRIBUTE_NONE
+				|| att == DiscardCombo.ATTRIBUTE_INVALID
+				|| att == DiscardCombo.ATTRIBUTE_PASS) {
+			return score;
+		}
+		for (CardInfo card : record.getDiscardCombo().getCards()) {
+			if (card.getCount() == 5) {
+				score += 5;
+			} else if (card.getCount() == 10) {
+				score += 10;
+			} else if (card.getCount() == 13) {
+				score += 10;
+			}
+		}
+		return score;
+	}
+
 	public int getCurrentSequence() {
 		return mCurrentSequence;
 	}
 
-	public int getCurrentRouns() {
+	public int getCurrentRound() {
 		return mCurrentRound;
 	}
 
@@ -90,5 +130,14 @@ public class Recorder {
 			}
 		}
 		return null;
+	}
+
+	public int getLastRoundWinner() {
+		DiscardRecord record = getLastRecordNotPass();
+		if (record == null) {
+			Log.e(TAG, "error!round not finish!");
+			return 0;
+		}
+		return record.getDiscardCombo().getSeat();
 	}
 }

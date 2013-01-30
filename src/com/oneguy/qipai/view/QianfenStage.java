@@ -12,7 +12,7 @@ public class QianfenStage extends Stage {
 
 	public QianfenStage(Context context) {
 		super(context);
-		setBackgroundResource(R.drawable.deck_background);
+		setBackgroundResource(R.drawable.common_bg_normal);
 		mContext = context;
 		mResourceManager = ResourceManger.getInstance();
 	}

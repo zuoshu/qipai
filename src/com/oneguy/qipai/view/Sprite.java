@@ -1,12 +1,20 @@
 package com.oneguy.qipai.view;
 
 import android.content.Context;
+import android.util.AttributeSet;
 import android.view.View;
 import android.widget.RelativeLayout.LayoutParams;
 
 public class Sprite extends View {
-
 	private Stage mStage;
+
+	public Sprite(Context context) {
+		super(context);
+	}
+
+	public Sprite(Context context, AttributeSet attrs) {
+		super(context, attrs);
+	}
 
 	public Sprite(Context context, int width, int height) {
 		super(context);

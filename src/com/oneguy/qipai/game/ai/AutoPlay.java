@@ -7,8 +7,8 @@ import java.util.Random;
 import android.util.Log;
 
 import com.oneguy.qipai.BuildConfig;
-import com.oneguy.qipai.entity.CardInfo;
-import com.oneguy.qipai.entity.Player;
+import com.oneguy.qipai.game.CardInfo;
+import com.oneguy.qipai.game.Player;
 import com.oneguy.qipai.game.Recorder;
 import com.oneguy.qipai.game.control.QianfenDirector;
 import com.oneguy.qipai.view.Poker;
@@ -53,14 +53,14 @@ public class AutoPlay {
 		} else {
 			mPlayerSeatInAction = (mPlayerSeatInAction + 1) % 4;
 		}
-
 		// if (BuildConfig.DEBUG) {
 		// Log.d(TAG, "takeTurns->" + mPlayerSeatInAction);
 		// }
 	}
 
-	private boolean isOneRoundFinish() {
-		return mRecorder.getCurrentSequence() == 0;
+	public boolean isOneRoundFinish() {
+		return mRecorder.getCurrentSequence() == 0
+				&& mRecorder.getCurrentRound() > 0;
 	}
 
 	private int pickStartOfNewRound() {

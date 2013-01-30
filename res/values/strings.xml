@@ -12,45 +12,66 @@
     <!-- 主界面 -->
     <string name="name">玩家：</string>
     <string name="score">分数：</string>
+    <string name="count">手牌: </string>
 
     <!-- 开始按钮 -->
     <string name="start">开始</string>
     <!-- size -->
     <string name="card_width_percent">0.07</string>
     <string name="card_height_percent">0.15</string>
-    <string name="card_face_width_percent">0.02</string>
-    <string name="card_face_height_percent">0.07</string>
-    <string name="player0_info_margin_left_percent">0.3</string>
-    <string name="player0_info_margin_top_percent">0.7</string>
+    <string name="card_face_width_percent">0.03</string>
+    <string name="card_face_height_percent">0.12</string>
+    <string name="player0_info_margin_left_percent">0.05</string>
+    <string name="player0_info_margin_top_percent">0.82</string>
     <string name="player1_info_margin_left_percent">0.8</string>
-    <string name="player1_info_margin_top_percent">0.3</string>
-    <string name="player2_info_margin_left_percent">0.3</string>
-    <string name="player2_info_margin_top_percent">0.2</string>
+    <string name="player1_info_margin_top_percent">0.48</string>
+    <string name="player2_info_margin_left_percent">0.45</string>
+    <string name="player2_info_margin_top_percent">0.05</string>
     <string name="player3_info_margin_left_percent">0.05</string>
-    <string name="player3_info_margin_top_percent">0.3</string>
-    <string name="start_button_width_percent">0.03</string>
-    <string name="start_button_height_percent">0.01</string>
-    <string name="start_button_margin_left_percent">0.3</string>
-    <string name="start_button_margin_top_percent">0.55</string>
+    <string name="player3_info_margin_top_percent">0.48</string>
+    <string name="start_button_width_percent">0.2</string>
+    <string name="start_button_height_percent">0.07</string>
+    <string name="start_button_margin_left_percent">0.45</string>
+    <string name="start_button_margin_top_percent">0.63</string>
     <string name="cards_horizontal_max_spacing">0.03</string>
     <string name="cards_vertical_max_spacing">0.03</string>
-    <string name="bottom_and_up_cards_start_x_percent">0.3</string>
-    <string name="bottom_and_up_cards_end_x_percent">0.7</string>
-    <string name="bottom_cards_y_percent">0.8</string>
+    <string name="bottom_and_up_cards_start_x_percent">0.25</string>
+    <string name="bottom_and_up_cards_end_x_percent">0.9</string>
+    <string name="bottom_cards_y_percent">0.85</string>
     <string name="up_cards_y_percent">0.05</string>
     <string name="left_and_right_cards_y_percent">0.5</string>
     <string name="left_cards_start_x_percent">0</string>
     <string name="left_cards_end_x_percent">0.4</string>
     <string name="right_cards_start_x_percent">0.6</string>
     <string name="right_cards_end_x_percent">1</string>
+    <string name="horizontal_discard_start_x_percent">0.46</string>
+    <string name="horizontal_discard_end_x_percent">0.56</string>
+    <string name="bottom_discard_y_percent">0.68</string>
+    <string name="up_discard_y_percent">0.28</string>
+    <string name="left_discard_start_x_percent">0.27</string>
+    <string name="left_discard_end_x_percent">0.37</string>
+    <string name="left_discard_y_percent">0.45</string>
+    <string name="right_discard_start_x_percent">0.65</string>
+    <string name="right_discard_end_x_percent">0.75</string>
+    <string name="right_discard_y_percent">0.45</string>
+    <string name="left_pass_lable_x">0.3</string>
+    <string name="left_pass_lable_y">0.51</string>
+    <string name="bottom_pass_lable_x">0.43</string>
+    <string name="bottom_pass_lable_y">0.7</string>
+    <string name="right_pass_lable_x">0.6</string>
+    <string name="right_pass_lable_y">0.51</string>
+    <string name="up_pass_lable_x">0.43</string>
+    <string name="up_pass_lable_y">0.3</string>
+    <string name="seleceted_gap">0.035</string>
 
     <!-- 计时器位置 -->
     <string name="left_clock_x_percent">0.1</string>
     <string name="left_clock_y_percent">0.3</string>
-    <string name="bottom_clock_x_percent">0.7</string>
+    <string name="bottom_clock_x_percent">0.5</string>
     <string name="bottom_clock_y_percent">0.4</string>
     <string name="right_clock_x_percent">0.9</string>
     <string name="right_clock_y_percent">0.4</string>
     <string name="up_clock_x_percent">0.7</string>
     <string name="up_clock_y_percent">0.1</string>
+
 </resources>

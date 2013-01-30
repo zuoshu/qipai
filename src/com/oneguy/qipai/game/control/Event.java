@@ -7,7 +7,7 @@ public class Event{
 	public static final int TYPE_D_WAIT_FOR_PLAYER_INFO = 0;
 	public static final int TYPE_D_WAIT_SHUFFLE = 1;// 等待洗牌信息
 	public static final int TYPE_D_INIT_COMPLETE = 2;// 初始化完毕
-	public static final int TYPE_D_WAIT_PLAYER_ACTION = 3;// 等待玩家出牌
+	public static final int TYPE_D_WAIT_PLAYER_DISCARD = 3;// 等待玩家出牌
 	public static final int TYPE_D_PLAYER_ACTION_TIME_OUT = 4;// 玩家出牌超时
 
 	// Opponent事件

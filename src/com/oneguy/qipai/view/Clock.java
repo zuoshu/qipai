@@ -1,10 +1,9 @@
 package com.oneguy.qipai.view;
 
-import android.content.Context;
-import android.util.Log;
-import android.widget.Button;
+import com.oneguy.qipai.R;
 
-import com.oneguy.qipai.BuildConfig;
+import android.content.Context;
+import android.widget.Button;
 
 public class Clock extends Button implements Timer {
 
@@ -12,7 +11,7 @@ public class Clock extends Button implements Timer {
 	// 计时总时间
 	private long mTotalTime;
 	private long mLastupdateTime;
-	static final long CLOCK_UPDATE_DURATION = 10;
+	static final long CLOCK_UPDATE_DURATION = 100;
 	private Runnable mClockUpdateRunnable;
 	private OnTimeOutListener mListener;
 	private static final String TAG = "Clock";
@@ -24,13 +23,7 @@ public class Clock extends Button implements Timer {
 			@Override
 			public void run() {
 				long currentTime = System.currentTimeMillis();
-
 				long duration = currentTime - mStartTime;
-
-				if (BuildConfig.DEBUG) {
-//					Log.d(TAG, duration + "");
-				}
-
 				mTotalTime -= (currentTime - mLastupdateTime);
 				mLastupdateTime = currentTime;
 				if (mTotalTime <= 0) {
@@ -43,6 +36,7 @@ public class Clock extends Button implements Timer {
 				}
 			}
 		};
+		setBackgroundResource(R.drawable.lordhl_clock_bg);
 	}
 
 	/**
@@ -98,7 +92,7 @@ public class Clock extends Button implements Timer {
 	public interface OnTimeOutListener {
 		public void onTimeOut();
 	}
-	
+
 	public void cancleTiming() {
 		this.removeCallbacks(mClockUpdateRunnable);
 	}

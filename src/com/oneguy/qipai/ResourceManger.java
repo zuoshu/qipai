@@ -14,7 +14,7 @@ import android.graphics.Color;
 import android.util.Log;
 import android.view.View;
 
-import com.oneguy.qipai.entity.CardInfo;
+import com.oneguy.qipai.game.CardInfo;
 import com.oneguy.qipai.view.Poker;
 
 public final class ResourceManger {
@@ -300,9 +300,9 @@ public final class ResourceManger {
 
 	private void storeCardBitmapId() {
 		mCardFaceResMap.put(Constants.CARD_JOKER_BLACK,
-				R.drawable.card_joker_small);
+				R.drawable.card_joker_black);
 		mCardFaceResMap
-				.put(Constants.CARD_JOKER_RED, R.drawable.card_joker_big);
+				.put(Constants.CARD_JOKER_RED, R.drawable.card_joker_red);
 		// 黑桃
 		mCardFaceResMap.put(Constants.CARD_SPADE_1, R.drawable.card_spade_1);
 		mCardFaceResMap.put(Constants.CARD_SPADE_2, R.drawable.card_spade_2);
@@ -467,5 +467,16 @@ public final class ResourceManger {
 
 	public HashMap<String, Poker> getPokerMap() {
 		return mPokerHashMap;
+	}
+
+	public List<Poker> getPokers(List<CardInfo> cards) {
+		if (cards == null || cards.size() == 0) {
+			return null;
+		}
+		List<Poker> pokers = new ArrayList<Poker>(cards.size());
+		for (CardInfo card : cards) {
+			pokers.add(mPokerHashMap.get(card.getName()));
+		}
+		return pokers;
 	}
 }

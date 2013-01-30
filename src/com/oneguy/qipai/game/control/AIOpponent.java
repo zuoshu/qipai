@@ -10,19 +10,25 @@ import android.util.Log;
 
 import com.oneguy.qipai.BuildConfig;
 import com.oneguy.qipai.Constants;
-import com.oneguy.qipai.game.ai.Director;
+import com.oneguy.qipai.QianfenApplication;
+import com.oneguy.qipai.game.ai.AutoPlay;
+import com.oneguy.qipai.game.ai.DiscardCombo;
 
 public class AIOpponent extends Opponent {
 
 	public static final String STATUS_TAG = "Opponent_status";
+	// AI出牌延时
+	public static final long AI_DISCARD_DELAY = 1000;
 
 	// 牌组信息，用于洗牌，只保存序号，每个序号对应ResourceManager里面card数组
 	// 洗牌时只要知道序号即可
 	private int[] cards;
+	private AutoPlay mAI;
 
 	public AIOpponent() {
 		super();
 		initCards();
+		mAI = QianfenApplication.autoPlayer;
 	}
 
 	@Override
@@ -42,10 +48,19 @@ public class AIOpponent extends Opponent {
 			}
 			deployEvent(Event.TYPE_O_SHUFFLE_COMPLETE, cards);
 			break;
+		case Event.TYPE_D_WAIT_PLAYER_DISCARD:
+			autoPlay();
+			break;
 		default:
 			// do nothing
 		}
 
+	}
+
+	private void autoPlay() {
+		DiscardCombo discard = mAI.discard();
+		deployEvent(Event.TYPE_C_DISCARD, discard,
+				mAI.getInActionPlayerSeat() == 0 ? 0 : AI_DISCARD_DELAY);
 	}
 
 	private void initCards() {

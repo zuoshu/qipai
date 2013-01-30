@@ -1,4 +1,4 @@
-package com.oneguy.qipai.entity;
+package com.oneguy.qipai.game;
 
 
 public class CardInfo implements Comparable<CardInfo> {

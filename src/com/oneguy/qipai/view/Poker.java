@@ -2,19 +2,27 @@ package com.oneguy.qipai.view;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.PaintFlagsDrawFilter;
 import android.graphics.Rect;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
 import com.oneguy.qipai.R;
-import com.oneguy.qipai.entity.CardInfo;
-import com.oneguy.qipai.entity.Player;
+import com.oneguy.qipai.ResourceManger;
+import com.oneguy.qipai.game.CardInfo;
+import com.oneguy.qipai.game.Player;
 
 public class Poker extends Sprite implements Comparable<Poker> {
 
 	private static final String TAG = "Card";
+	private static final int SELECTED_GAP = ResourceManger.getInstance()
+			.getVerticalDimen(R.string.seleceted_gap);
+	private static final PaintFlagsDrawFilter FILTER = new PaintFlagsDrawFilter(
+			0, Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
 	private Bitmap mCardFace;
 	private boolean mIsSelected;
 	protected Rect mCardFaceDestRect;
@@ -22,24 +30,73 @@ public class Poker extends Sprite implements Comparable<Poker> {
 	protected int mCardFaceHeight;
 	private CardInfo mCardInfo;
 	private Player mPlayer;
-
-	// 相当于唯一标识
+	private Bitmap mSelectBitmap;
+	private Rect mCardRect;
+	private int selectedY;
+	private int unselectedY;
 
 	public Poker(Context context, CardInfo card, Bitmap cardFace, int width,
 			int height, int cardFaceWidth, int cardFaceHeight) {
 		super(context, width, height);
 		mCardInfo = card;
-		setBackgroundResource(R.drawable.lord_card_backface_big);
+		// setBackgroundColor(Color.WHITE);
+		setBackgroundResource(R.drawable.lord_card_bg_big);
 		mCardFace = cardFace;
 		mCardFaceWidth = cardFaceWidth;
 		mCardFaceHeight = cardFaceHeight;
 		mCardFaceDestRect = new Rect(0, 0, mCardFaceWidth, mCardFaceHeight);
+		mSelectBitmap = BitmapFactory.decodeResource(context.getResources(),
+				R.drawable.card_selected);
+		mCardRect = new Rect();
+		selectedY = 0;
+		unselectedY = 0;
+	}
+
+	@Override
+	public void setY(int y) {
+		super.setY(y);
+		if (selectedY == 0) {
+			initBaseline(y);
+		}
+	}
+
+	@Override
+	public void set(int x, int y) {
+		super.set(x, y);
+		if (selectedY == 0) {
+			initBaseline(y);
+		}
+	}
+
+	private void initBaseline(int y) {
+		unselectedY = y;
+		selectedY = unselectedY - SELECTED_GAP;
 	}
 
 	public void setSelected(boolean isSelected) {
+		// boolean changeToSelected = false;
+		// boolean changeToDeselected = false;
+		// if (mIsSelected && !isSelected) {
+		// changeToDeselected = true;
+		// } else if (!mIsSelected && isSelected) {
+		// changeToSelected = true;
+		// }
+		// if (changeToSelected) {
+		// int y = getY();
+		// y -= SELECTED_GAP;
+		// setY(y);
+		// } else if (changeToDeselected) {
+		// int y = getY();
+		// y += SELECTED_GAP;
+		// setY(y);
+		// }
 		mIsSelected = isSelected;
-		setBackgroundResource(mIsSelected ? R.drawable.card_selected
-				: R.drawable.lord_card_backface_big);
+		if (mIsSelected) {
+			setY(selectedY);
+		} else {
+			setY(unselectedY);
+		}
+		invalidate();
 	}
 
 	@Override
@@ -50,8 +107,8 @@ public class Poker extends Sprite implements Comparable<Poker> {
 		}
 		switch (event.getAction()) {
 		case MotionEvent.ACTION_DOWN:
-			// Log.d(TAG, "onTouchEvent");
 			setSelected(!mIsSelected);
+			break;
 		}
 		return true;
 	}
@@ -59,6 +116,13 @@ public class Poker extends Sprite implements Comparable<Poker> {
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
+		canvas.setDrawFilter(FILTER);
+		if (mIsSelected) {
+			mCardRect.right = getWidth();
+			mCardRect.bottom = getHeight();
+			canvas.drawBitmap(mSelectBitmap, null, mCardRect, null);
+			Log.d(TAG, "draw select");
+		}
 		canvas.drawBitmap(mCardFace, null, mCardFaceDestRect, null);
 	}
 

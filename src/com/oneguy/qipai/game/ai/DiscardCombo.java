@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.List;
 
 import com.oneguy.qipai.Constants;
-import com.oneguy.qipai.entity.CardInfo;
+import com.oneguy.qipai.game.CardInfo;
 
 /**
  * 牌组，记录一次出牌信息

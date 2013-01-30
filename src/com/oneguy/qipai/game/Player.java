@@ -1,18 +1,18 @@
-package com.oneguy.qipai.entity;
+package com.oneguy.qipai.game;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
 import android.view.View;
-import android.widget.TextView;
+import android.widget.ImageView;
 
 import com.oneguy.qipai.QianfenApplication;
 import com.oneguy.qipai.R;
 import com.oneguy.qipai.ResourceManger;
 import com.oneguy.qipai.game.ai.DiscardCombo;
+import com.oneguy.qipai.view.PlayerInfo;
 import com.oneguy.qipai.view.Poker;
 
 public class Player {
@@ -35,19 +35,20 @@ public class Player {
 	private List<Poker> mCards;
 	private int score;
 	private String name;
-	private View mInfoView;
-	private TextView mPlayerName;
-	private TextView mPlayerScore;
+	private PlayerInfo mPlayerInfoView;
+	private ImageView mPassImage;
 
 	public Player() {
 		mCards = new LinkedList<Poker>();
 		score = 0;
+		mPlayerInfoView = new PlayerInfo();
+		setPassImage();
 	}
 
-	private void generateInfoView(int res) {
-		mInfoView = View.inflate(QianfenApplication.getInstance(), res, null);
-		mPlayerName = (TextView) mInfoView.findViewById(R.id.playerName);
-		mPlayerScore = (TextView) mInfoView.findViewById(R.id.playerScore);
+	private void setPassImage() {
+		mPassImage = new ImageView(QianfenApplication.getInstance());
+		mPassImage.setImageResource(R.drawable.pass);
+		mPassImage.setVisibility(View.GONE);
 	}
 
 	public void addCard(Poker c) {
@@ -56,10 +57,11 @@ public class Player {
 
 	public void sortCards() {
 		Collections.sort(mCards);
+		mPlayerInfoView.setCardCount(mCards.size());
 	}
 
 	public void beginMatch() {
-		score = 0;
+		setScore(0);
 		mCards.clear();
 	}
 
@@ -77,12 +79,6 @@ public class Player {
 
 	public void setSeat(int seat) {
 		this.seat = seat;
-		if (mInfoView == null && (seat == SEAT_LEFT || seat == SEAT_RIGHT)) {
-			generateInfoView(R.layout.player_info_view_v);
-		} else if (mInfoView == null
-				&& (seat == SEAT_UP || seat == SEAT_BOTTOM)) {
-			generateInfoView(R.layout.player_info_view_h);
-		}
 	}
 
 	public int getScore() {
@@ -91,6 +87,12 @@ public class Player {
 
 	public void setScore(int score) {
 		this.score = score;
+		mPlayerInfoView.setScore(String.valueOf(score));
+	}
+
+	public void addScore(int score) {
+		this.score += score;
+		mPlayerInfoView.setScore(String.valueOf(score));
 	}
 
 	public String getName() {
@@ -99,6 +101,7 @@ public class Player {
 
 	public void setName(String name) {
 		this.name = name;
+		mPlayerInfoView.setName(name);
 	}
 
 	public String toString() {
@@ -110,6 +113,7 @@ public class Player {
 		if (mCards != null) {
 			mCards.clear();
 		}
+		mPlayerInfoView.setCardCount(0);
 	}
 
 	public String getCardSequence() {
@@ -122,15 +126,6 @@ public class Player {
 			sb.append('\n');
 		}
 		return sb.toString();
-	}
-
-	public View getInfoView() {
-		if (mInfoView == null) {
-			return null;
-		}
-		mPlayerName.setText(name);
-		mPlayerScore.setText(String.valueOf(score));
-		return mInfoView;
 	}
 
 	public List<Poker> getCards() {
@@ -188,27 +183,114 @@ public class Player {
 		}
 	}
 
+	public void showCard(Poker poker) {
+		if (poker != null) {
+			poker.setVisibility(View.VISIBLE);
+			poker.bringToFront();
+			poker.invalidate();
+		}
+	}
+
 	// TODO
 	public void moveCardsToDeck(DiscardCombo discard) {
+		ResourceManger resourceManager = ResourceManger.getInstance();
+		if (seat != SEAT_BOTTOM && seat != SEAT_RIGHT && seat != SEAT_UP
+				&& seat != SEAT_LEFT && (mCards == null || mCards.size() == 0)) {
+			return;
+		}
+		if (discard.getArrtibute() == DiscardCombo.ATTRIBUTE_PASS
+				|| discard.getArrtibute() == DiscardCombo.ATTRIBUTE_NONE
+				|| discard.getArrtibute() == DiscardCombo.ATTRIBUTE_INVALID) {
+			return;
+		}
+		int startX = 0, endX = 0, y = 0, cardSpacing = 0;
+		if (seat == SEAT_BOTTOM) {
+			startX = resourceManager
+					.getHorizontalDimen(R.string.horizontal_discard_start_x_percent);
+			endX = resourceManager
+					.getHorizontalDimen(R.string.horizontal_discard_end_x_percent);
+			y = resourceManager
+					.getVerticalDimen(R.string.bottom_discard_y_percent);
+		} else if (seat == SEAT_RIGHT) {
+			startX = resourceManager
+					.getHorizontalDimen(R.string.right_discard_start_x_percent);
+			endX = resourceManager
+					.getHorizontalDimen(R.string.right_discard_end_x_percent);
+			y = resourceManager
+					.getVerticalDimen(R.string.right_discard_y_percent);
+		} else if (seat == SEAT_UP) {
+			startX = resourceManager
+					.getHorizontalDimen(R.string.horizontal_discard_start_x_percent);
+			endX = resourceManager
+					.getHorizontalDimen(R.string.horizontal_discard_end_x_percent);
+			y = resourceManager.getVerticalDimen(R.string.up_discard_y_percent);
+		} else if (seat == SEAT_LEFT) {
+			startX = resourceManager
+					.getHorizontalDimen(R.string.left_discard_start_x_percent);
+			endX = resourceManager
+					.getHorizontalDimen(R.string.left_discard_end_x_percent);
+			y = resourceManager
+					.getVerticalDimen(R.string.left_discard_y_percent);
+		}
+		int cardsMaxHorizontalSpacing = resourceManager
+				.getHorizontalDimen(R.string.cards_horizontal_max_spacing);
+		List<CardInfo> cards = discard.getCards();
+		cardSpacing = Math.min(cardsMaxHorizontalSpacing, (endX - startX)
+				/ cards.size());
+		HashMap<String, Poker> pokers = resourceManager.getPokerMap();
+		for (int i = 0; i < cards.size(); i++) {
+			CardInfo card = cards.get(i);
+			Poker poker = pokers.get(card.getName());
+			poker.setSelected(false);
+			poker.set(startX + i * cardSpacing, y);
+			showCard(poker);
+		}
+	}
+
+	public void removeCardsFromHand(DiscardCombo discard) {
 		List<CardInfo> cards = discard.getCards();
 		ResourceManger res = ResourceManger.getInstance();
 		HashMap<String, Poker> pokers = res.getPokerMap();
 		for (CardInfo ci : cards) {
 			Poker p = pokers.get(ci.getName());
-			p.setVisibility(View.GONE);
-			p.invalidate();
+			// p.setVisibility(View.GONE);
+			// p.invalidate();
 			mCards.remove(p);
 		}
-	}
-
-	public void removeCardsFromHand(DiscardCombo discard) {
-		// TODO Auto-generated method stub
-
 	}
 
 	public void discard(DiscardCombo discard) {
 		moveCardsToDeck(discard);
 		removeCardsFromHand(discard);
-		sortCards();
+		// sortCards();
+		updateCardCount();
+	}
+
+	public void updateCardCount() {
+		mPlayerInfoView.setCardCount(mCards.size());
+	}
+
+	public View getInfoView() {
+		return mPlayerInfoView.getView();
+	}
+
+	public ImageView getPassLable() {
+		return mPassImage;
+	}
+
+	public void showPassLable() {
+		mPassImage.setVisibility(View.VISIBLE);
+		mPassImage.invalidate();
+	}
+
+	public void hidePassLable() {
+		mPassImage.setVisibility(View.GONE);
+		mPassImage.invalidate();
+	}
+
+	public void deselectAllCards() {
+		for (Poker poker : mCards) {
+			poker.setSelected(false);
+		}
 	}
 }

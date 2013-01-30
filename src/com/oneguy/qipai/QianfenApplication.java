@@ -5,7 +5,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.WindowManager;
 
-import com.oneguy.qipai.entity.Player;
+import com.oneguy.qipai.game.Player;
 import com.oneguy.qipai.game.Recorder;
 import com.oneguy.qipai.game.ai.AutoPlay;
 import com.oneguy.qipai.game.ai.Judge;

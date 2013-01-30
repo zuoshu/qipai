@@ -26,11 +26,22 @@ public abstract class Opponent implements EventListener {
 		directorHandler.sendMessage(msg);
 	}
 
+	public void deployEvent(Message msg, long delayMillis) {
+		directorHandler.sendMessageDelayed(msg, delayMillis);
+	}
+
 	public void deployEvent(int what, Object data) {
 		Message msg = new Message();
 		msg.what = what;
 		msg.obj = data;
 		deployEvent(msg);
+	}
+
+	public void deployEvent(int what, Object data, long delayMillis) {
+		Message msg = new Message();
+		msg.what = what;
+		msg.obj = data;
+		deployEvent(msg, delayMillis);
 	}
 
 	public void deployEvent(int what) {
