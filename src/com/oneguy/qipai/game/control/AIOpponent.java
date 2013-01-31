@@ -59,8 +59,7 @@ public class AIOpponent extends Opponent {
 
 	private void autoPlay() {
 		DiscardCombo discard = mAI.discard();
-		deployEvent(Event.TYPE_C_DISCARD, discard,
-				mAI.getInActionPlayerSeat() == 0 ? 0 : AI_DISCARD_DELAY);
+		deployEvent(Event.TYPE_C_DISCARD, discard);
 	}
 
 	private void initCards() {

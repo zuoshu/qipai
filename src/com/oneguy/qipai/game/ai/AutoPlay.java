@@ -10,6 +10,7 @@ import com.oneguy.qipai.BuildConfig;
 import com.oneguy.qipai.game.CardInfo;
 import com.oneguy.qipai.game.Player;
 import com.oneguy.qipai.game.Recorder;
+import com.oneguy.qipai.game.Recorder.PlayerStatus;
 import com.oneguy.qipai.game.control.QianfenDirector;
 import com.oneguy.qipai.view.Poker;
 
@@ -52,6 +53,10 @@ public class AutoPlay {
 			}
 		} else {
 			mPlayerSeatInAction = (mPlayerSeatInAction + 1) % 4;
+			while (mRecorder.getPlayerStatus(mPlayerSeatInAction).equals(
+					PlayerStatus.RUN_OUT)) {
+				mPlayerSeatInAction = (mPlayerSeatInAction + 1) % 4;
+			}
 		}
 		// if (BuildConfig.DEBUG) {
 		// Log.d(TAG, "takeTurns->" + mPlayerSeatInAction);
@@ -71,7 +76,11 @@ public class AutoPlay {
 			}
 			return 0;
 		}
-		return record.getDiscardCombo().getSeat();
+		int seat = record.getDiscardCombo().getSeat();
+		while (mRecorder.getPlayerStatus(seat).equals(PlayerStatus.RUN_OUT)) {
+			seat = (seat + 1) % 4;
+		}
+		return seat;
 	}
 
 	public DiscardCombo discard() {

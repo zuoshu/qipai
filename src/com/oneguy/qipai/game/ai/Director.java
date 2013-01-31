@@ -74,15 +74,23 @@ public abstract class Director implements EventListener {
 		return mHandler;
 	}
 
+	public void sendEventMessage(Message message, long delay) {
+		mHandler.sendMessageDelayed(message, delay);
+	}
+
 	public void sendEventMessage(Message message) {
-		mHandler.sendMessage(message);
+		mHandler.sendMessageDelayed(message, 0);
 	}
 
 	public void sendEventMessage(int what, Object obj) {
+		sendEventMessage(what, obj, 0);
+	}
+
+	public void sendEventMessage(int what, Object obj, long delay) {
 		Message msg = new Message();
 		msg.what = what;
 		msg.obj = obj;
-		sendEventMessage(msg);
+		sendEventMessage(msg, delay);
 	}
 
 	public void sendEventMessage(int what) {

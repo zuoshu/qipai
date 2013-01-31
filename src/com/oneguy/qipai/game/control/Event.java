@@ -9,6 +9,7 @@ public class Event{
 	public static final int TYPE_D_INIT_COMPLETE = 2;// 初始化完毕
 	public static final int TYPE_D_WAIT_PLAYER_DISCARD = 3;// 等待玩家出牌
 	public static final int TYPE_D_PLAYER_ACTION_TIME_OUT = 4;// 玩家出牌超时
+	public static final int TYPE_D_PLAYER_FINISH_DISCARD = 5;// 出牌完毕
 
 	// Opponent事件
 	// 获取玩家信息完毕

@@ -19,10 +19,26 @@ public class Recorder {
 	private static final DiscardCombo CARD_COMBO_NONE = new DiscardCombo(
 			Player.SEAT_NONE);
 
+	public enum PlayerStatus {
+		RUN_OUT // 出完了
+		, KEEP // 没出完
+	}
+
+	private int[] mPlayerRunoutSequence;// 记录大游，二游，三游，四游
+	private PlayerStatus[] mPlayerStatus;// 记录每个玩家是否已出完
+
 	public Recorder(Player[] players) {
 		mPlayers = players;
 		// not started
 		mRecords = new ArrayList<DiscardRecord>();
+		mPlayerRunoutSequence = new int[4];
+		mPlayerStatus = new PlayerStatus[4];
+		for (int i = 0; i < mPlayerStatus.length; i++) {
+			mPlayerStatus[i] = PlayerStatus.KEEP;
+		}
+		for (int i = 0; i < mPlayerRunoutSequence.length; i++) {
+			mPlayerRunoutSequence[i] = -1;
+		}
 	}
 
 	/**
@@ -52,7 +68,7 @@ public class Recorder {
 	}
 
 	private void increaseSequence() {
-		if (mCurrentSequence == 3) {
+		if (mCurrentSequence == getCurrentPlayerCount() - 1) {
 			mCurrentSequence = 0;
 			mCurrentRound++;
 		} else {
@@ -65,29 +81,28 @@ public class Recorder {
 	 * @return 返回上轮出牌，如果不够一轮则返回null
 	 */
 	public DiscardRecord[] getLastRoundRecord() {
+		int playerCount = getCurrentPlayerCount();
 		int size = mRecords.size();
-		if (size < 4) {
+		if (size < playerCount) {
 			return null;
 		}
-		DiscardRecord[] data = new DiscardRecord[4];
-		data[0] = mRecords.get(size - 4);
-		data[1] = mRecords.get(size - 3);
-		data[2] = mRecords.get(size - 2);
-		data[3] = mRecords.get(size - 1);
+		DiscardRecord[] data = new DiscardRecord[playerCount];
+		for (int i = 0; i < playerCount; i++) {
+			data[i] = mRecords.get(size - playerCount + i);
+		}
 		return data;
 	}
 
 	public int countLastRoundScore() {
+		int playerCount = getCurrentPlayerCount();
 		int score = 0;
 		int size = mRecords.size();
-		if (size < 4) {
+		if (size < playerCount) {
 			return score;
 		}
-		if (size % 4 == 0) {
-			score += countDiscardRecordScore(mRecords.get(size - 4));
-			score += countDiscardRecordScore(mRecords.get(size - 3));
-			score += countDiscardRecordScore(mRecords.get(size - 2));
-			score += countDiscardRecordScore(mRecords.get(size - 1));
+		for (int i = 0; i < playerCount; i++) {
+			score += countDiscardRecordScore(mRecords.get(size - playerCount
+					+ i));
 		}
 		return score;
 	}
@@ -139,5 +154,34 @@ public class Recorder {
 			return 0;
 		}
 		return record.getDiscardCombo().getSeat();
+	}
+
+	public int getCurrentPlayerCount() {
+		int i = 0;
+		for (PlayerStatus ps : mPlayerStatus) {
+			if (ps.equals(PlayerStatus.KEEP)) {
+				i++;
+			}
+		}
+		return i;
+	}
+
+	public void markPlayerRunout(int seat) {
+		mPlayerStatus[seat] = PlayerStatus.RUN_OUT;
+		for (int i = 0; i < mPlayerRunoutSequence.length; i++) {
+			if (mPlayerRunoutSequence[i] == -1) {
+				mPlayerRunoutSequence[i] = seat;
+				break;
+			}
+		}
+		if (mCurrentSequence == 0) {
+			mCurrentSequence = getCurrentPlayerCount()-1;
+		} else {
+			mCurrentSequence--;
+		}
+	}
+
+	public PlayerStatus getPlayerStatus(int seat) {
+		return mPlayerStatus[seat];
 	}
 }

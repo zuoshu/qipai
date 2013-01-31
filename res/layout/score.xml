@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
+
+        <TextView
+            android:id="@+id/score_title"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/score_title" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
+
+        <LinearLayout
+            android:id="@+id/player_name"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="@dimen/score_panel_col_title_weight"
+                android:gravity="left"
+                android:text="玩家" />
+
+            <TextView
+                android:id="@+id/name_player0"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="@dimen/score_panel_col_content_weight"
+                android:gravity="center"
+                android:text="0" />
+
+            <TextView
+                android:id="@+id/name_player1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="@dimen/score_panel_col_content_weight"
+                android:gravity="center"
+                android:text="0" />
+
+            <TextView
+                android:id="@+id/name_player2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="@dimen/score_panel_col_content_weight"
+                android:gravity="center"
+                android:text="0" />
+
+            <TextView
+                android:id="@+id/name_player3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="@dimen/score_panel_col_content_weight"
+                android:gravity="center"
+                android:text="0" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
+
+        <LinearLayout
+            android:id="@+id/player_score"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="@dimen/score_panel_col_title_weight"
+                android:gravity="left"
+                android:text="得分" />
+
+            <TextView
+                android:id="@+id/score_player0"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="@dimen/score_panel_col_content_weight"
+                android:gravity="center"
+                android:text="0" />
+
+            <TextView
+                android:id="@+id/score_player1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="@dimen/score_panel_col_content_weight"
+                android:gravity="center"
+                android:text="0" />
+
+            <TextView
+                android:id="@+id/score_player2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="@dimen/score_panel_col_content_weight"
+                android:gravity="center"
+                android:text="0" />
+
+            <TextView
+                android:id="@+id/score_player3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="@dimen/score_panel_col_content_weight"
+                android:gravity="center"
+                android:text="0" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
+
+        <LinearLayout
+            android:id="@+id/player_ranking"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="@dimen/score_panel_col_title_weight"
+                android:gravity="left"
+                android:text="名次" />
+
+            <TextView
+                android:id="@+id/rank_player0"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="@dimen/score_panel_col_content_weight"
+                android:gravity="center"
+                android:text="0" />
+
+            <TextView
+                android:id="@+id/rank_player1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="@dimen/score_panel_col_content_weight"
+                android:gravity="center"
+                android:text="0" />
+
+            <TextView
+                android:id="@+id/rank_player2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="@dimen/score_panel_col_content_weight"
+                android:gravity="center"
+                android:text="0" />
+
+            <TextView
+                android:id="@+id/rank_player3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="@dimen/score_panel_col_content_weight"
+                android:gravity="center"
+                android:text="0" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal" >
+
+        <Button
+            android:id="@+id/btnNextMatch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="next" />
+
+        <Button
+            android:id="@+id/btnQuit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="quit" />
+    </LinearLayout>
+
+</LinearLayout>

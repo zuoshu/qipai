@@ -92,7 +92,7 @@ public class Player {
 
 	public void addScore(int score) {
 		this.score += score;
-		mPlayerInfoView.setScore(String.valueOf(score));
+		mPlayerInfoView.setScore(String.valueOf(this.score));
 	}
 
 	public String getName() {
@@ -292,5 +292,9 @@ public class Player {
 		for (Poker poker : mCards) {
 			poker.setSelected(false);
 		}
+	}
+
+	public boolean isRunout() {
+		return mCards.size() == 0;
 	}
 }

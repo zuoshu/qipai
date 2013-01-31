@@ -115,5 +115,5 @@ public class Constants {
 	public static final String MODE_SIGNLE = "single";
 
 	// 出牌超时
-	public static final long PLAY_ACTION_TIME_OUT = 5000;
+	public static final long PLAY_ACTION_TIME_OUT = 1000;
 }

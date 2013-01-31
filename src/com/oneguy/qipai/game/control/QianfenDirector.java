@@ -7,12 +7,14 @@ import org.json.JSONObject;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.RelativeLayout.LayoutParams;
+import android.widget.Toast;
 
 import com.oneguy.qipai.BuildConfig;
 import com.oneguy.qipai.Constants;
@@ -36,6 +38,8 @@ public class QianfenDirector extends Director implements OnClickListener {
 
 	public static final String TAG = "QianfenDirector";
 	public static final String STATUS_TAG = "director_status";
+	private static final int WAIT_AFTER_ROUND_FINISH = 500;
+	private static final int WAIT_AFTER_DISCARD_FINISH = 0;
 	static final int BOTTOM = 0;
 	static final int RIGHT = 1;
 	static final int UP = 2;
@@ -187,10 +191,9 @@ public class QianfenDirector extends Director implements OnClickListener {
 				// 对于每轮出牌的计算和服务器出现不一致，以服务器为准！
 				mAI.setWhoIsFirst(seat3);
 			}
-			if (mAI.isOneRoundFinish()) {
-				onRoundFinish();
-				onNewRoundStart();
-			}
+			// if (mAI.isOneRoundFinish()) {
+			// onNewRoundStart();
+			// }
 			// 如果是自己出牌并且托管，则启动自动出牌
 			if (seat3 == Player.SEAT_SELF && !mAutoPlay) {
 				setClock(mAI.getInActionPlayerSeat());
@@ -233,17 +236,34 @@ public class QianfenDirector extends Director implements OnClickListener {
 			} else {
 				playerDiscard(discard);
 			}
-			mRecorder.addDiscard(discard);
+			sendEventMessage(Event.TYPE_D_PLAYER_FINISH_DISCARD, discard,
+					WAIT_AFTER_DISCARD_FINISH);
+			break;
+		case Event.TYPE_D_PLAYER_FINISH_DISCARD:
+			DiscardCombo discard2 = (DiscardCombo) event.obj;
+			int seat4 = discard2.getSeat();
+			mRecorder.addDiscard(discard2);
 			// 通知对手自己已出牌
-			if (discard.getSeat() == Player.SEAT_SELF) {
+			if (seat4 == Player.SEAT_SELF) {
 				Message msg = new Message();
 				msg.copyFrom(event);
 				deployEvent(msg);
 			}
-			mAI.takeTurns();
 			// 单机版只托管一轮
 			setAutoPlay(false);
-			waitDiscard();
+			if (mAI.isOneRoundFinish()) {
+				updateScore();
+				clearLastRoundDisacrd();
+			}
+			if (mPlayers[seat4].isRunout()) {
+				onPlayerRunout(seat4);
+			}
+			if (mRecorder.getCurrentPlayerCount() < 2) {
+				onGameFinish();
+			} else {
+				mAI.takeTurns();
+				waitDiscard();
+			}
 			break;
 		default:
 			Log.e(TAG, "unhandle event:" + event.what);
@@ -251,7 +271,20 @@ public class QianfenDirector extends Director implements OnClickListener {
 		}
 	}
 
-	private void onNewRoundStart() {
+	private void onPlayerRunout(int seat) {
+		mPlayers[seat].getInfoView().setBackgroundColor(Color.RED);
+		mRecorder.markPlayerRunout(seat);
+	}
+
+	private void onGameFinish() {
+		Toast.makeText(mQianfen, "finish!", Toast.LENGTH_LONG).show();
+	}
+
+	// private void onNewRoundStart() {
+	// clearLastRoundDisacrd();
+	// }
+
+	private void clearLastRoundDisacrd() {
 		// 清除上一轮出的牌
 		DiscardRecord[] records = mRecorder.getLastRoundRecord();
 		if (records == null) {
@@ -268,27 +301,33 @@ public class QianfenDirector extends Director implements OnClickListener {
 				poker.postInvalidate();
 			}
 		}
-		for(Player player:mPlayers){
+		for (Player player : mPlayers) {
 			player.hidePassLable();
 		}
 	}
 
-	private void onRoundFinish() {
+	private void updateScore() {
 		int seat = mRecorder.getLastRoundWinner();
 		int score = mRecorder.countLastRoundScore();
 		mPlayers[seat].addScore(score);
 	}
 
 	private void waitDiscard() {
+		waitDiscard(0);
+	}
+
+	private void waitDiscard(long delay) {
 		sendEventMessage(Event.TYPE_D_WAIT_PLAYER_DISCARD,
-				mAI.getInActionPlayerSeat());
+				mAI.getInActionPlayerSeat(), delay);
 	}
 
 	private void playerDiscard(DiscardCombo discard) {
 		Player player = mPlayers[discard.getSeat()];
 		player.discard(discard);
-		player.layoutCards();
-		player.deselectAllCards();
+		if (player.getCards().size() > 0) {
+			player.layoutCards();
+			player.deselectAllCards();
+		}
 	}
 
 	private void playerPass(DiscardCombo discard) {
