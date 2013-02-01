@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
 import android.widget.Toast;
 
@@ -33,13 +34,17 @@ import com.oneguy.qipai.view.Clock;
 import com.oneguy.qipai.view.Clock.OnTimeOutListener;
 import com.oneguy.qipai.view.Poker;
 import com.oneguy.qipai.view.QianfenStage;
+import com.oneguy.qipai.view.ScorePanel;
+import com.oneguy.qipai.view.ScorePanel.ScorePanelButtonClickListener;
 
-public class QianfenDirector extends Director implements OnClickListener {
-
+public class QianfenDirector extends Director implements OnClickListener,
+		ScorePanelButtonClickListener {
 	public static final String TAG = "QianfenDirector";
 	public static final String STATUS_TAG = "director_status";
 	private static final int WAIT_AFTER_ROUND_FINISH = 500;
-	private static final int WAIT_AFTER_DISCARD_FINISH = 0;
+	private static final int WAIT_AFTER_DISCARD_FINISH = 500;
+	// 出牌超时
+	public static final long PLAY_ACTION_TIME_OUT = 2000;
 	static final int BOTTOM = 0;
 	static final int RIGHT = 1;
 	static final int UP = 2;
@@ -58,8 +63,9 @@ public class QianfenDirector extends Director implements OnClickListener {
 	private Button mStartButton;
 	private Clock mClock;
 	private PlayerTimeOutListener mPlayerTimeOutListener;
+	// 托管
 	private boolean mAutoPlay = false;
-
+	private ScorePanel mScorePanel;
 	private Opponent mOpponent;
 
 	public QianfenDirector(Activity activity, int playWith) {
@@ -117,7 +123,6 @@ public class QianfenDirector extends Director implements OnClickListener {
 		});
 		mStartButton.setLayoutParams(lp);
 		mStage.addView(mStartButton);
-
 		// 计时器
 		mClock = new Clock(mActivity);
 		lp = new LayoutParams(LayoutParams.WRAP_CONTENT,
@@ -125,6 +130,18 @@ public class QianfenDirector extends Director implements OnClickListener {
 		mClock.setLayoutParams(lp);
 		mClock.setVisibility(View.GONE);
 		mStage.addView(mClock);
+		// 记分板
+		mScorePanel = new ScorePanel();
+		mScorePanel.setButtonsListener(this);
+		View scoreView = mScorePanel.getView();
+		lp = new LayoutParams(LayoutParams.WRAP_CONTENT,
+				LayoutParams.WRAP_CONTENT);
+		lp.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
+		scoreView.setLayoutParams(lp);
+		scoreView.setVisibility(View.GONE);
+		mStage.addView(scoreView);
+		putPlayerViewOntoStage();
+		addPassLable();
 	}
 
 	@Override
@@ -134,7 +151,7 @@ public class QianfenDirector extends Director implements OnClickListener {
 
 	@Override
 	public void onStop() {
-		resetAllCards();
+		reset();
 		mStage.removeAllViews();
 	}
 
@@ -159,8 +176,6 @@ public class QianfenDirector extends Director implements OnClickListener {
 			setPlayerInfo(event.obj);
 			logPlayerInfoIfDebug();
 			// getReadyToShuffle
-			putPlayerViewOntoStage();
-			addPassLable();
 			mStartButton.setVisibility(View.VISIBLE);
 			break;
 		// 洗牌
@@ -170,6 +185,7 @@ public class QianfenDirector extends Director implements OnClickListener {
 			}
 			deployEvent(Event.TYPE_D_WAIT_SHUFFLE);
 			break;
+		// 洗牌完毕
 		case Event.TYPE_O_SHUFFLE_COMPLETE:
 			clearPlayerCards();
 			setCardSequence(event.obj);
@@ -191,12 +207,17 @@ public class QianfenDirector extends Director implements OnClickListener {
 				// 对于每轮出牌的计算和服务器出现不一致，以服务器为准！
 				mAI.setWhoIsFirst(seat3);
 			}
-			// if (mAI.isOneRoundFinish()) {
-			// onNewRoundStart();
-			// }
 			// 如果是自己出牌并且托管，则启动自动出牌
-			if (seat3 == Player.SEAT_SELF && !mAutoPlay) {
-				setClock(mAI.getInActionPlayerSeat());
+			if (seat3 == Player.SEAT_SELF) {
+				DiscardCombo discard = mAI.discard();
+				// 自动过牌
+				if (discard.getArrtibute() == DiscardCombo.ATTRIBUTE_PASS) {
+					sendEventMessage(Event.TYPE_C_DISCARD, discard);
+				} else if (!mAutoPlay) {
+					setClock(mAI.getInActionPlayerSeat());
+				} else {
+					deployEvent(Event.TYPE_D_WAIT_PLAYER_DISCARD, seat3);
+				}
 			} else {
 				deployEvent(Event.TYPE_D_WAIT_PLAYER_DISCARD, seat3);
 			}
@@ -206,9 +227,6 @@ public class QianfenDirector extends Director implements OnClickListener {
 			// 如果是自己超时，则托管出牌，如果是对手超时，则等待，过30秒后启动掉线检测
 			int seat2 = mAI.getInActionPlayerSeat();
 			if (seat2 == Player.SEAT_BOTTOM) {
-				// if (BuildConfig.DEBUG) {
-				// Log.d(STATUS_TAG, "玩家出牌超时，托管");
-				// }
 				// 单机版先不托管
 				setAutoPlay(true);
 				waitDiscard();
@@ -239,6 +257,7 @@ public class QianfenDirector extends Director implements OnClickListener {
 			sendEventMessage(Event.TYPE_D_PLAYER_FINISH_DISCARD, discard,
 					WAIT_AFTER_DISCARD_FINISH);
 			break;
+		// 出牌后清理
 		case Event.TYPE_D_PLAYER_FINISH_DISCARD:
 			DiscardCombo discard2 = (DiscardCombo) event.obj;
 			int seat4 = discard2.getSeat();
@@ -277,12 +296,35 @@ public class QianfenDirector extends Director implements OnClickListener {
 	}
 
 	private void onGameFinish() {
-		Toast.makeText(mQianfen, "finish!", Toast.LENGTH_LONG).show();
-	}
+		mScorePanel.setName(Player.SEAT_BOTTOM,
+				mPlayers[Player.SEAT_BOTTOM].getName());
+		mScorePanel.setName(Player.SEAT_RIGHT,
+				mPlayers[Player.SEAT_RIGHT].getName());
+		mScorePanel.setName(Player.SEAT_UP, mPlayers[Player.SEAT_UP].getName());
+		mScorePanel.setName(Player.SEAT_LEFT,
+				mPlayers[Player.SEAT_LEFT].getName());
 
-	// private void onNewRoundStart() {
-	// clearLastRoundDisacrd();
-	// }
+		mScorePanel.setScore(Player.SEAT_BOTTOM,
+				mPlayers[Player.SEAT_BOTTOM].getScore());
+		mScorePanel.setScore(Player.SEAT_RIGHT,
+				mPlayers[Player.SEAT_RIGHT].getScore());
+		mScorePanel.setScore(Player.SEAT_UP,
+				mPlayers[Player.SEAT_UP].getScore());
+		mScorePanel.setScore(Player.SEAT_LEFT,
+				mPlayers[Player.SEAT_LEFT].getScore());
+
+		mRecorder.markLastRunout();
+		mScorePanel.setRanking(Player.SEAT_BOTTOM,
+				mRecorder.getPlayerRanking(Player.SEAT_BOTTOM));
+		mScorePanel.setRanking(Player.SEAT_RIGHT,
+				mRecorder.getPlayerRanking(Player.SEAT_RIGHT));
+		mScorePanel.setRanking(Player.SEAT_UP,
+				mRecorder.getPlayerRanking(Player.SEAT_UP));
+		mScorePanel.setRanking(Player.SEAT_LEFT,
+				mRecorder.getPlayerRanking(Player.SEAT_LEFT));
+		mScorePanel.invalidate();
+		mScorePanel.show();
+	}
 
 	private void clearLastRoundDisacrd() {
 		// 清除上一轮出的牌
@@ -362,11 +404,6 @@ public class QianfenDirector extends Director implements OnClickListener {
 		}
 
 	}
-
-	// private void putActorsOntoStage() {
-	// putPlayerInfoOntoStage();
-	// putHandCardsOntoStage();
-	// }
 
 	private void putPlayerViewOntoStage() {
 		// player0自己 坐在下面
@@ -481,8 +518,7 @@ public class QianfenDirector extends Director implements OnClickListener {
 	 * @return 0-3分别代表bottom,right,top,left的玩家
 	 */
 	private int genRandomStart() {
-		// return (Math.abs((int) System.currentTimeMillis())) % 4;
-		return 0;
+		return (Math.abs((int) System.currentTimeMillis())) % 4;
 	}
 
 	/**
@@ -529,7 +565,7 @@ public class QianfenDirector extends Director implements OnClickListener {
 		mClock.setVisibility(View.VISIBLE);
 
 		mPlayerTimeOutListener.setPlayerSeat(inActionPlayerSeat);
-		mClock.start(mPlayerTimeOutListener, Constants.PLAY_ACTION_TIME_OUT);
+		mClock.start(mPlayerTimeOutListener, PLAY_ACTION_TIME_OUT);
 	}
 
 	public Player[] getPlayers() {
@@ -579,6 +615,35 @@ public class QianfenDirector extends Director implements OnClickListener {
 			sendEventMessage(Event.TYPE_D_PLAYER_ACTION_TIME_OUT, playerSeat);
 			mClock.setVisibility(View.GONE);
 		}
+	}
+
+	@Override
+	public void onNextMatchClick() {
+		startNewMatch();
+	}
+
+	@Override
+	public void onQuitClick() {
+		quitGame();
+	}
+
+	private void startNewMatch() {
+		reset();
+		sendEventMessage(Event.TYPE_D_INIT_COMPLETE);
+	}
+
+	private void quitGame() {
+		reset();
+		mActivity.finish();
+	}
+
+	private void reset() {
+		resetAllCards();
+		for (Player p : mPlayers) {
+			p.reset();
+		}
+		mRecorder.reset();
+		mScorePanel.reset();
 	}
 
 }

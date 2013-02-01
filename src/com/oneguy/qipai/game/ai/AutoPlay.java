@@ -7,6 +7,7 @@ import java.util.Random;
 import android.util.Log;
 
 import com.oneguy.qipai.BuildConfig;
+import com.oneguy.qipai.Constants;
 import com.oneguy.qipai.game.CardInfo;
 import com.oneguy.qipai.game.Player;
 import com.oneguy.qipai.game.Recorder;
@@ -58,9 +59,6 @@ public class AutoPlay {
 				mPlayerSeatInAction = (mPlayerSeatInAction + 1) % 4;
 			}
 		}
-		// if (BuildConfig.DEBUG) {
-		// Log.d(TAG, "takeTurns->" + mPlayerSeatInAction);
-		// }
 	}
 
 	public boolean isOneRoundFinish() {
@@ -193,97 +191,213 @@ public class AutoPlay {
 
 	private void pickSingle(int seat, List<Poker> handCard,
 			DiscardCombo lastDiscard, List<DiscardCombo> result) {
-		int lastOrder = lastDiscard.getOrder();
-		ArrayList<CardInfo> cards;
-		for (Poker p : handCard) {
-			if (p.getCardInfo().getOrder() > lastOrder) {
-				cards = new ArrayList<CardInfo>();
-				cards.add(p.getCardInfo());
-				result.add(new DiscardCombo(cards, seat));
-			}
-		}
+		pickSame(seat, handCard, lastDiscard, result, 1,
+				DiscardCombo.ATTRIBUTE_SINGLE);
 	}
 
 	private void pickPair(int seat, List<Poker> handCard,
 			DiscardCombo lastDiscard, List<DiscardCombo> result) {
-		ArrayList<CardInfo> cards;
-		int lastOrder = lastDiscard.getOrder();
-		for (int i = 0; i < handCard.size() - 1; i++) {
-			if (handCard.get(i).getCardInfo().getCount() == handCard.get(i + 1)
-					.getCardInfo().getCount()
-					&& handCard.get(i).getCardInfo().getOrder() > lastOrder) {
-				cards = new ArrayList<CardInfo>();
-				cards.add(handCard.get(i).getCardInfo());
-				cards.add(handCard.get(i + 1).getCardInfo());
-				result.add(new DiscardCombo(cards, seat));
-			}
-		}
+		// pickSame(seat, handCard, lastDiscard, result, 2);
 	}
 
 	private void pickThree(int seat, List<Poker> handCard,
 			DiscardCombo lastDiscard, List<DiscardCombo> result) {
-		// TODO Auto-generated method stub
-
+		// pickSame(seat, handCard, lastDiscard, result, 3);
 	}
 
 	private void pickFake510K(int seat, List<Poker> handCard,
 			DiscardCombo lastDiscard, List<DiscardCombo> result) {
-		// TODO Auto-generated method stub
-
+		// pick K
+		List<CardInfo> listOfK = pickCardInSortedCards(handCard, 13);
+		if (listOfK == null || listOfK.size() == 0) {
+			return;
+		}
+		// pick 10
+		List<CardInfo> listOf10 = pickCardInSortedCards(handCard, 10);
+		if (listOf10 == null || listOf10.size() == 0) {
+			return;
+		}
+		// pick 5
+		List<CardInfo> listOf5 = pickCardInSortedCards(handCard, 5);
+		if (listOf5 == null || listOf5.size() == 0) {
+			return;
+		}
+		// combine
+		for (CardInfo pokerK : listOfK) {
+			for (CardInfo poker10 : listOf10) {
+				for (CardInfo poker5 : listOf5) {
+					// when 5 10 k suit not all equal
+					if (!(pokerK.getSuit() == poker10.getSuit() && pokerK
+							.getSuit() == poker5.getSuit())) {
+						ArrayList<CardInfo> cards = new ArrayList<CardInfo>();
+						cards.add(pokerK);
+						cards.add(poker10);
+						cards.add(poker5);
+						result.add(new DiscardCombo(cards, seat,
+								DiscardCombo.ATTRIBUTE_510K_FAKE));
+					}
+				}
+			}
+		}
 	}
 
 	private void pickFour(int seat, List<Poker> handCard,
 			DiscardCombo lastDiscard, List<DiscardCombo> result) {
-		// TODO Auto-generated method stub
-
+		// pickSame(seat, handCard, lastDiscard, result, 4);
 	}
 
 	private void pickDiamond510K(int seat, List<Poker> handCard,
 			DiscardCombo lastDiscard, List<DiscardCombo> result) {
-		// TODO Auto-generated method stub
-
+		pickFlush510K(seat, handCard, lastDiscard, result,
+				Constants.SUIT_DIAMOND);
 	}
 
 	private void pickClub510K(int seat, List<Poker> handCard,
 			DiscardCombo lastDiscard, List<DiscardCombo> result) {
-		// TODO Auto-generated method stub
-
+		pickFlush510K(seat, handCard, lastDiscard, result, Constants.SUIT_CLUB);
 	}
 
 	private void pickHeart510K(int seat, List<Poker> handCard,
 			DiscardCombo lastDiscard, List<DiscardCombo> result) {
-		// TODO Auto-generated method stub
-
+		pickFlush510K(seat, handCard, lastDiscard, result, Constants.SUIT_HEART);
 	}
 
 	private void pickSpade510K(int seat, List<Poker> handCard,
 			DiscardCombo lastDiscard, List<DiscardCombo> result) {
-		// TODO Auto-generated method stub
+		pickFlush510K(seat, handCard, lastDiscard, result, Constants.SUIT_SPADE);
+	}
 
+	private void pickFlush510K(int seat, List<Poker> handCard,
+			DiscardCombo lastDiscard, List<DiscardCombo> result, int suit) {
+		int att = DiscardCombo.ATTRIBUTE_510K_FLUSH_DIAMOND;
+		if (suit == Constants.SUIT_DIAMOND) {
+			att = DiscardCombo.ATTRIBUTE_510K_FLUSH_DIAMOND;
+		} else if (suit == Constants.SUIT_CLUB) {
+			att = DiscardCombo.ATTRIBUTE_510K_FLUSH_CLUB;
+		} else if (suit == Constants.SUIT_HEART) {
+			att = DiscardCombo.ATTRIBUTE_510K_FLUSH_HEART;
+		} else if (suit == Constants.SUIT_SPADE) {
+			att = DiscardCombo.ATTRIBUTE_510K_FLUSH_SPADE;
+		}
+		// pick K
+		List<CardInfo> listOfK = pickCardInSortedCards(handCard, 13, suit);
+		if (listOfK == null || listOfK.size() == 0) {
+			return;
+		}
+		// pick 10
+		List<CardInfo> listOf10 = pickCardInSortedCards(handCard, 10, suit);
+		if (listOf10 == null || listOf10.size() == 0) {
+			return;
+		}
+		// pick 5
+		List<CardInfo> listOf5 = pickCardInSortedCards(handCard, 5, suit);
+		if (listOf5 == null || listOf5.size() == 0) {
+			return;
+		}
+		// combine
+		for (CardInfo pokerK : listOfK) {
+			for (CardInfo poker10 : listOf10) {
+				for (CardInfo poker5 : listOf5) {
+					ArrayList<CardInfo> cards = new ArrayList<CardInfo>();
+					cards.add(pokerK);
+					cards.add(poker10);
+					cards.add(poker5);
+					result.add(new DiscardCombo(cards, seat, att));
+				}
+			}
+		}
 	}
 
 	private void pickFive(int seat, List<Poker> handCard,
 			DiscardCombo lastDiscard, List<DiscardCombo> result) {
-		// TODO Auto-generated method stub
-
+		pickSame(seat, handCard, lastDiscard, result, 5,
+				DiscardCombo.ATTRIBUTE_FIVE);
 	}
 
 	private void pickSix(int seat, List<Poker> handCard,
 			DiscardCombo lastDiscard, List<DiscardCombo> result) {
-		// TODO Auto-generated method stub
-
+		pickSame(seat, handCard, lastDiscard, result, 6,
+				DiscardCombo.ATTRIBUTE_SIX);
 	}
 
 	private void pickSeven(int seat, List<Poker> handCard,
 			DiscardCombo lastDiscard, List<DiscardCombo> result) {
-		// TODO Auto-generated method stub
-
+		pickSame(seat, handCard, lastDiscard, result, 7,
+				DiscardCombo.ATTRIBUTE_SEVEN);
 	}
 
 	private void pickEight(int seat, List<Poker> handCard,
 			DiscardCombo lastDiscard, List<DiscardCombo> result) {
-		// TODO Auto-generated method stub
+		pickSame(seat, handCard, lastDiscard, result, 8,
+				DiscardCombo.ATTRIBUTE_EIGHT);
+	}
 
+	private void pickSame(int seat, List<Poker> handCard,
+			DiscardCombo lastDiscard, List<DiscardCombo> result, int sameSize,
+			int att) {
+		ArrayList<CardInfo> cards = new ArrayList<CardInfo>();
+		int lastOrder = lastDiscard.getOrder();
+		int baseCount = 0;
+		int sameCardSize = 0;
+		for (int i = 0; i < handCard.size() - sameSize + 1; i++) {
+			if (handCard.get(i).getCardInfo().getOrder() <= lastOrder) {
+				continue;
+			}
+			sameCardSize = 0;
+			baseCount = 0;
+			baseCount = handCard.get(i).getCardInfo().getCount();
+			cards.add(handCard.get(i).getCardInfo());
+			sameCardSize++;
+			for (int j = 1; j < sameSize; j++) {
+				if (handCard.get(i + j).getCardInfo().getCount() == baseCount) {
+					sameCardSize++;
+					cards.add(handCard.get(i + j).getCardInfo());
+				} else {
+					break;
+				}
+			}
+			if (sameCardSize == sameSize) {
+				result.add(new DiscardCombo(cards, seat, att));
+				cards = new ArrayList<CardInfo>();
+			} else {
+				cards.clear();
+			}
+		}
+	}
+
+	public List<CardInfo> pickCardInSortedCards(List<Poker> pokers, int order) {
+		if (pokers == null || pokers.size() == 0) {
+			return null;
+		}
+		List<CardInfo> result = new ArrayList<CardInfo>();
+		for (int i = 0; i < pokers.size(); i++) {
+			Poker p = pokers.get(i);
+			if (p.getCardInfo().getOrder() == order) {
+				result.add(p.getCardInfo());
+			}
+			if (p.getCardInfo().getOrder() < order) {
+				break;
+			}
+		}
+		return result;
+	}
+
+	public List<CardInfo> pickCardInSortedCards(List<Poker> pokers, int order,
+			int suit) {
+		if (pokers == null || pokers.size() == 0) {
+			return null;
+		}
+		List<CardInfo> result = new ArrayList<CardInfo>();
+		for (Poker p : pokers) {
+			CardInfo card = p.getCardInfo();
+			if (card.getOrder() == order && card.getSuit() == suit) {
+				result.add(card);
+			}
+			if (p.getCardInfo().getOrder() < order) {
+				break;
+			}
+		}
+		return result;
 	}
 
 	/**
@@ -297,6 +411,10 @@ public class AutoPlay {
 	 */
 	public boolean isShowCardsValid(int seat, int[] cards) {
 		return true;
+	}
+
+	public void reset() {
+
 	}
 
 }

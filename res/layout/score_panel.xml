@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:orientation="vertical" >
+    android:layout_height="wrap_content"
+    android:background="@drawable/lobby_detail_bg"
+    android:orientation="vertical"
+    android:padding="15dp" >
 
     <LinearLayout
         android:layout_width="fill_parent"
@@ -31,7 +33,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="@dimen/score_panel_col_title_weight"
+                android:layout_weight="1"
                 android:gravity="left"
                 android:text="玩家" />
 
@@ -39,7 +41,7 @@
                 android:id="@+id/name_player0"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="@dimen/score_panel_col_content_weight"
+                android:layout_weight="2"
                 android:gravity="center"
                 android:text="0" />
 
@@ -47,7 +49,7 @@
                 android:id="@+id/name_player1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="@dimen/score_panel_col_content_weight"
+                android:layout_weight="2"
                 android:gravity="center"
                 android:text="0" />
 
@@ -55,7 +57,7 @@
                 android:id="@+id/name_player2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="@dimen/score_panel_col_content_weight"
+                android:layout_weight="2"
                 android:gravity="center"
                 android:text="0" />
 
@@ -63,7 +65,7 @@
                 android:id="@+id/name_player3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="@dimen/score_panel_col_content_weight"
+                android:layout_weight="2"
                 android:gravity="center"
                 android:text="0" />
         </LinearLayout>
@@ -83,7 +85,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="@dimen/score_panel_col_title_weight"
+                android:layout_weight="1"
                 android:gravity="left"
                 android:text="得分" />
 
@@ -91,7 +93,7 @@
                 android:id="@+id/score_player0"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="@dimen/score_panel_col_content_weight"
+                android:layout_weight="2"
                 android:gravity="center"
                 android:text="0" />
 
@@ -99,7 +101,7 @@
                 android:id="@+id/score_player1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="@dimen/score_panel_col_content_weight"
+                android:layout_weight="2"
                 android:gravity="center"
                 android:text="0" />
 
@@ -107,7 +109,7 @@
                 android:id="@+id/score_player2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="@dimen/score_panel_col_content_weight"
+                android:layout_weight="2"
                 android:gravity="center"
                 android:text="0" />
 
@@ -115,7 +117,7 @@
                 android:id="@+id/score_player3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="@dimen/score_panel_col_content_weight"
+                android:layout_weight="2"
                 android:gravity="center"
                 android:text="0" />
         </LinearLayout>
@@ -135,7 +137,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="@dimen/score_panel_col_title_weight"
+                android:layout_weight="1"
                 android:gravity="left"
                 android:text="名次" />
 
@@ -143,7 +145,7 @@
                 android:id="@+id/rank_player0"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="@dimen/score_panel_col_content_weight"
+                android:layout_weight="2"
                 android:gravity="center"
                 android:text="0" />
 
@@ -151,7 +153,7 @@
                 android:id="@+id/rank_player1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="@dimen/score_panel_col_content_weight"
+                android:layout_weight="2"
                 android:gravity="center"
                 android:text="0" />
 
@@ -159,7 +161,7 @@
                 android:id="@+id/rank_player2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="@dimen/score_panel_col_content_weight"
+                android:layout_weight="2"
                 android:gravity="center"
                 android:text="0" />
 
@@ -167,7 +169,7 @@
                 android:id="@+id/rank_player3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="@dimen/score_panel_col_content_weight"
+                android:layout_weight="2"
                 android:gravity="center"
                 android:text="0" />
         </LinearLayout>

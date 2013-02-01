@@ -48,8 +48,7 @@ public class Poker extends Sprite implements Comparable<Poker> {
 		mSelectBitmap = BitmapFactory.decodeResource(context.getResources(),
 				R.drawable.card_selected);
 		mCardRect = new Rect();
-		selectedY = 0;
-		unselectedY = 0;
+		resetCoordinate();
 	}
 
 	@Override
@@ -147,5 +146,12 @@ public class Poker extends Sprite implements Comparable<Poker> {
 	public void reset() {
 		setVisibility(View.GONE);
 		mIsSelected = false;
+		resetCoordinate();
+	}
+
+	// called when start a new game
+	public void resetCoordinate() {
+		unselectedY = 0;
+		selectedY = 0;
 	}
 }

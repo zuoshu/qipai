@@ -20,8 +20,7 @@ public class PlayerInfo extends AbstractView {
 				.findViewById(R.id.playerCardCount);
 	}
 
-	@Override
-	public View inflateView() {
+	private View inflateView() {
 		View view = View.inflate(QianfenApplication.getInstance(),
 				R.layout.player_info_view_v, null);
 		return view;
@@ -39,6 +38,7 @@ public class PlayerInfo extends AbstractView {
 		mPlayerCardCount.setText(String.valueOf(count));
 	}
 
+	@Override
 	public View getView(){
 		return mInfoView;
 	}

@@ -424,7 +424,7 @@ public final class ResourceManger {
 	public void clear() {
 		// mMemCache.evictAll();
 		// isImageCached = false;
-		mInstance = null;
+		// mInstance = null;
 	}
 
 	public float getFloatFromString(int id) {

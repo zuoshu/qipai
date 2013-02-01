@@ -18,26 +18,36 @@ public class Recorder {
 	private int mCurrentSequence;
 	private static final DiscardCombo CARD_COMBO_NONE = new DiscardCombo(
 			Player.SEAT_NONE);
+	private int mCurrentRank;
 
 	public enum PlayerStatus {
 		RUN_OUT // 出完了
 		, KEEP // 没出完
 	}
 
-	private int[] mPlayerRunoutSequence;// 记录大游，二游，三游，四游
+	private int[] mPlayerRanking;// 记录大游，二游，三游，四游
 	private PlayerStatus[] mPlayerStatus;// 记录每个玩家是否已出完
 
 	public Recorder(Player[] players) {
 		mPlayers = players;
 		// not started
 		mRecords = new ArrayList<DiscardRecord>();
-		mPlayerRunoutSequence = new int[4];
+		mPlayerRanking = new int[4];
 		mPlayerStatus = new PlayerStatus[4];
+		resetRanking();
+		resetStatus();
+	}
+
+	private void resetRanking() {
+		mCurrentRank = 1;
+		for (int i = 0; i < mPlayerRanking.length; i++) {
+			mPlayerRanking[i] = -1;
+		}
+	}
+
+	private void resetStatus() {
 		for (int i = 0; i < mPlayerStatus.length; i++) {
 			mPlayerStatus[i] = PlayerStatus.KEEP;
-		}
-		for (int i = 0; i < mPlayerRunoutSequence.length; i++) {
-			mPlayerRunoutSequence[i] = -1;
 		}
 	}
 
@@ -168,14 +178,10 @@ public class Recorder {
 
 	public void markPlayerRunout(int seat) {
 		mPlayerStatus[seat] = PlayerStatus.RUN_OUT;
-		for (int i = 0; i < mPlayerRunoutSequence.length; i++) {
-			if (mPlayerRunoutSequence[i] == -1) {
-				mPlayerRunoutSequence[i] = seat;
-				break;
-			}
-		}
+		mPlayerRanking[seat] = mCurrentRank;
+		mCurrentRank++;
 		if (mCurrentSequence == 0) {
-			mCurrentSequence = getCurrentPlayerCount()-1;
+			mCurrentSequence = getCurrentPlayerCount() - 1;
 		} else {
 			mCurrentSequence--;
 		}
@@ -183,5 +189,29 @@ public class Recorder {
 
 	public PlayerStatus getPlayerStatus(int seat) {
 		return mPlayerStatus[seat];
+	}
+
+	public int getPlayerRanking(int seat) {
+		if (seat < 0 || seat > 3) {
+			return -1;
+		}
+		return mPlayerRanking[seat];
+	}
+
+	public void markLastRunout() {
+		for (int i = 0; i < 4; i++) {
+			if (mPlayerRanking[i] == -1) {
+				mPlayerRanking[i] = mCurrentRank;
+			}
+		}
+	}
+
+	public void reset() {
+		mCurrentRound = 0;
+		mCurrentSequence = 0;
+		mCurrentRank = 1;
+		mRecords.clear();
+		resetStatus();
+		resetRanking();
 	}
 }

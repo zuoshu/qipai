@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
+import android.graphics.Color;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -58,11 +59,6 @@ public class Player {
 	public void sortCards() {
 		Collections.sort(mCards);
 		mPlayerInfoView.setCardCount(mCards.size());
-	}
-
-	public void beginMatch() {
-		setScore(0);
-		mCards.clear();
 	}
 
 	public int getSequence() {
@@ -191,7 +187,6 @@ public class Player {
 		}
 	}
 
-	// TODO
 	public void moveCardsToDeck(DiscardCombo discard) {
 		ResourceManger resourceManager = ResourceManger.getInstance();
 		if (seat != SEAT_BOTTOM && seat != SEAT_RIGHT && seat != SEAT_UP
@@ -253,8 +248,6 @@ public class Player {
 		HashMap<String, Poker> pokers = res.getPokerMap();
 		for (CardInfo ci : cards) {
 			Poker p = pokers.get(ci.getName());
-			// p.setVisibility(View.GONE);
-			// p.invalidate();
 			mCards.remove(p);
 		}
 	}
@@ -262,7 +255,6 @@ public class Player {
 	public void discard(DiscardCombo discard) {
 		moveCardsToDeck(discard);
 		removeCardsFromHand(discard);
-		// sortCards();
 		updateCardCount();
 	}
 
@@ -296,5 +288,12 @@ public class Player {
 
 	public boolean isRunout() {
 		return mCards.size() == 0;
+	}
+
+	public void reset() {
+		mPlayerInfoView.getView().setBackgroundColor(Color.WHITE);
+		setScore(0);
+		setName("");
+		clearCards();
 	}
 }
