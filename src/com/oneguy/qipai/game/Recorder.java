@@ -12,6 +12,7 @@ public class Recorder {
 	// 轮到谁出牌
 	private Player[] mPlayers;
 	private ArrayList<DiscardRecord> mRecords;
+	private ArrayList<DiscardRecord> mLastRoundRecords;
 	// 当前是第几轮出牌
 	private int mCurrentRound;
 	// 当前是本轮出牌的第几手0,1,2,3
@@ -32,6 +33,7 @@ public class Recorder {
 		mPlayers = players;
 		// not started
 		mRecords = new ArrayList<DiscardRecord>();
+		mLastRoundRecords = new ArrayList<DiscardRecord>();
 		mPlayerRanking = new int[4];
 		mPlayerStatus = new PlayerStatus[4];
 		resetRanking();
@@ -56,13 +58,13 @@ public class Recorder {
 	 * @return 返回上家出牌，如果一轮已经结束，则返回null.如果上家不要，则返回上上家出牌，依次类推
 	 */
 	public DiscardCombo getLastDiscard() {
-		int size = mRecords.size();
-		for (int i = size - 1; i >= size - mCurrentSequence; i--) {
-			int arribute = mRecords.get(i).getDiscardCombo().getArrtibute();
+		int size = mLastRoundRecords.size();
+		for (int i = size - 1; i >= 0; i--) {
+			int arribute = mLastRoundRecords.get(i).getDiscardCombo().getArrtibute();
 			if (arribute != DiscardCombo.ATTRIBUTE_NONE
 					&& arribute != DiscardCombo.ATTRIBUTE_INVALID
 					&& arribute != DiscardCombo.ATTRIBUTE_PASS) {
-				return mRecords.get(i).getDiscardCombo();
+				return mLastRoundRecords.get(i).getDiscardCombo();
 			}
 		}
 		return CARD_COMBO_NONE;
@@ -74,6 +76,7 @@ public class Recorder {
 		record.setRound(mCurrentRound);
 		record.setSequence(mCurrentSequence);
 		mRecords.add(record);
+		mLastRoundRecords.add(record);
 		increaseSequence();
 	}
 
@@ -90,29 +93,39 @@ public class Recorder {
 	 * 
 	 * @return 返回上轮出牌，如果不够一轮则返回null
 	 */
-	public DiscardRecord[] getLastRoundRecord() {
-		int playerCount = getCurrentPlayerCount();
-		int size = mRecords.size();
-		if (size < playerCount) {
-			return null;
-		}
-		DiscardRecord[] data = new DiscardRecord[playerCount];
-		for (int i = 0; i < playerCount; i++) {
-			data[i] = mRecords.get(size - playerCount + i);
-		}
-		return data;
+	public ArrayList<DiscardRecord> getLastRoundRecord() {
+		return mLastRoundRecords;
+		// int playerCount = getCurrentPlayerCount();
+		// int size = mRecords.size();
+		// if (size < playerCount) {
+		// return null;
+		// }
+		// DiscardRecord[] data = new DiscardRecord[playerCount];
+		// for (int i = 0; i < playerCount; i++) {
+		// data[i] = mRecords.get(size - playerCount + i);
+		// }
+		// return data;
 	}
 
 	public int countLastRoundScore() {
-		int playerCount = getCurrentPlayerCount();
+		// int playerCount = getCurrentPlayerCount();
+		// int score = 0;
+		// int size = mLastRoundRecords.size();
+		// if (size < playerCount) {
+		// return score;
+		// }
+		// for (int i = 0; i < playerCount; i++) {
+		// score += countDiscardRecordScore(mRecords.get(size - playerCount
+		// + i));
+		// }
+		// return score;
 		int score = 0;
-		int size = mRecords.size();
-		if (size < playerCount) {
+		int size = mLastRoundRecords.size();
+		if (size <= 0) {
 			return score;
 		}
-		for (int i = 0; i < playerCount; i++) {
-			score += countDiscardRecordScore(mRecords.get(size - playerCount
-					+ i));
+		for (DiscardRecord record : mLastRoundRecords) {
+			score += countDiscardRecordScore(record);
 		}
 		return score;
 	}
@@ -149,9 +162,16 @@ public class Recorder {
 	}
 
 	public DiscardRecord getLastRecordNotPass() {
-		for (int i = mRecords.size() - 1; i >= 0; i--) {
-			if (mRecords.get(i).getDiscardCombo().getArrtibute() != DiscardCombo.ATTRIBUTE_PASS) {
-				return mRecords.get(i);
+		// for (int i = mRecords.size() - 1; i >= 0; i--) {
+		// if (mRecords.get(i).getDiscardCombo().getArrtibute() !=
+		// DiscardCombo.ATTRIBUTE_PASS) {
+		// return mRecords.get(i);
+		// }
+		// }
+		// return null;
+		for (int i = mLastRoundRecords.size() - 1; i >= 0; i--) {
+			if (mLastRoundRecords.get(i).getDiscardCombo().getArrtibute() != DiscardCombo.ATTRIBUTE_PASS) {
+				return mLastRoundRecords.get(i);
 			}
 		}
 		return null;
@@ -206,12 +226,49 @@ public class Recorder {
 		}
 	}
 
+	public void clearLastRoundRecord() {
+		mLastRoundRecords.clear();
+	}
+
 	public void reset() {
 		mCurrentRound = 0;
 		mCurrentSequence = 0;
 		mCurrentRank = 1;
 		mRecords.clear();
+		mLastRoundRecords.clear();
 		resetStatus();
 		resetRanking();
+	}
+
+	private int countContinuousLastRoundPass() {
+		if (mLastRoundRecords == null || mLastRoundRecords.size() == 0) {
+			return 0;
+		}
+		int count = 0;
+		for (int i = mLastRoundRecords.size() - 1; i >= 0; i--) {
+			if (mLastRoundRecords.get(i).getDiscardCombo().getArrtibute() == DiscardCombo.ATTRIBUTE_PASS) {
+				count++;
+			}
+		}
+		return count;
+	}
+
+	private int countRunout() {
+		int count = 0;
+		for (PlayerStatus ps : mPlayerStatus) {
+			if (ps.equals(PlayerStatus.RUN_OUT)) {
+				count++;
+			}
+		}
+		return count;
+	}
+
+	public boolean isOneRoundFinish() {
+		if (mLastRoundRecords == null || mLastRoundRecords.size() == 0) {
+			return false;
+		}
+		int passCount = countContinuousLastRoundPass();
+		int runOutCount = countRunout();
+		return (passCount + runOutCount == 3);
 	}
 }

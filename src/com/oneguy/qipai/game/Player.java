@@ -1,5 +1,6 @@
 package com.oneguy.qipai.game;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -38,6 +39,7 @@ public class Player {
 	private String name;
 	private PlayerInfo mPlayerInfoView;
 	private ImageView mPassImage;
+	private DiscardCombo mDiscard;
 
 	public Player() {
 		mCards = new LinkedList<Poker>();
@@ -238,6 +240,7 @@ public class Player {
 			Poker poker = pokers.get(card.getName());
 			poker.setSelected(false);
 			poker.set(startX + i * cardSpacing, y);
+			poker.setFrontFace(true);
 			showCard(poker);
 		}
 	}
@@ -253,9 +256,26 @@ public class Player {
 	}
 
 	public void discard(DiscardCombo discard) {
-		moveCardsToDeck(discard);
-		removeCardsFromHand(discard);
+		mDiscard = discard;
+		moveCardsToDeck(mDiscard);
+		removeCardsFromHand(mDiscard);
 		updateCardCount();
+	}
+
+	public void removeDiscard() {
+		if (mDiscard == null || mDiscard.getCards() == null
+				|| mDiscard.getCards().size() == 0) {
+			return;
+		}
+		List<CardInfo> cards = mDiscard.getCards();
+		ResourceManger res = ResourceManger.getInstance();
+		HashMap<String, Poker> pokers = res.getPokerMap();
+		for (CardInfo ci : cards) {
+			Poker p = pokers.get(ci.getName());
+			p.setVisibility(View.GONE);
+			p.invalidate();
+		}
+		hidePassLable();
 	}
 
 	public void updateCardCount() {
@@ -288,6 +308,37 @@ public class Player {
 
 	public boolean isRunout() {
 		return mCards.size() == 0;
+	}
+
+	public void setHandCardFronFace(boolean isFrontFace) {
+		if (mCards == null || mCards.size() == 0) {
+			return;
+		}
+		for (Poker p : mCards) {
+			p.setFrontFace(isFrontFace);
+		}
+	}
+
+	public void selectDiscard(DiscardCombo discard) {
+		if (discard == null || discard.getCards() == null
+				|| discard.getCards().size() == 0) {
+			return;
+		}
+		List<Poker> pokers = ResourceManger.getInstance().getPokers(
+				discard.getCards());
+		for (Poker p : pokers) {
+			p.setSelected(true);
+		}
+	}
+
+	public List<CardInfo> getSelectedCards() {
+		List<CardInfo> cards = new ArrayList<CardInfo>();
+		for (Poker p : mCards) {
+			if (p.isSelected()) {
+				cards.add(p.getCardInfo());
+			}
+		}
+		return cards;
 	}
 
 	public void reset() {

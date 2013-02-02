@@ -1,7 +1,9 @@
 package com.oneguy.qipai.view;
 
 import android.content.Context;
+import android.util.Log;
 
+import com.oneguy.qipai.LogTime;
 import com.oneguy.qipai.R;
 import com.oneguy.qipai.ResourceManger;
 
@@ -12,9 +14,7 @@ public class QianfenStage extends Stage {
 
 	public QianfenStage(Context context) {
 		super(context);
-		setBackgroundResource(R.drawable.common_bg_normal);
 		mContext = context;
 		mResourceManager = ResourceManger.getInstance();
 	}
-
 }

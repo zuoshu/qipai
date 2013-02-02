@@ -19,12 +19,13 @@ import com.oneguy.qipai.view.Poker;
 
 public final class ResourceManger {
 	public static final String TAG = "ResourceManger";
-	private static ResourceManger mInstance = null;
+	private volatile static ResourceManger mInstance = null;
 	private Resources mResources;
 	// Default memory cache size
 	private static final int DEFAULT_MEM_CACHE_SIZE = 1024 * 1024 * 5; // 5MB
 	// private LruCache<String, Bitmap> mMemCache;
 	private HashMap<String, Integer> mCardFaceResMap;
+	private QianfenApplication mQianfenApp;
 	// private boolean isImageCached;
 
 	// 屏幕信息
@@ -59,6 +60,7 @@ public final class ResourceManger {
 	public synchronized static ResourceManger getInstance() {
 		if (mInstance == null) {
 			mInstance = new ResourceManger();
+			mInstance.initResources();
 		}
 		return mInstance;
 	}
@@ -72,7 +74,16 @@ public final class ResourceManger {
 		displayHeight = QianfenApplication.displayHeight;
 		// isImageCached = false;
 		mCardFaceResMap = new HashMap<String, Integer>(Constants.CARD_COUNT);
-		initResources();
+		mQianfenApp = QianfenApplication.getInstance();
+	}
+
+	public void initResources() {
+		if (BuildConfig.DEBUG) {
+			Log.d(TAG, "initResources");
+		}
+		computeSize();
+		storeCardBitmapId();
+		prepareCards();
 	}
 
 	private void computeSize() {
@@ -119,15 +130,6 @@ public final class ResourceManger {
 		startButtonMarginLeft = (int) (displayWidth * startButtonMarginLeftPercent);
 		startButtonMarginTop = (int) (displayHeight * startButtonMarginTopPercent);
 
-	}
-
-	public void initResources() {
-		if (BuildConfig.DEBUG) {
-			Log.d(TAG, "initResources");
-		}
-		computeSize();
-		storeCardBitmapId();
-		prepareCards();
 	}
 
 	private void prepareCards() {
@@ -256,7 +258,6 @@ public final class ResourceManger {
 		if (names == null || names.length < 3) {
 			return;
 		}
-		Context context = QianfenApplication.getInstance();
 		int suit;
 		int count;
 		int order;
@@ -291,11 +292,10 @@ public final class ResourceManger {
 				cardFaceName.length() - 2);
 		int resId = mCardFaceResMap.get(cardFaceNameNoTail);
 		CardInfo cardInfo = new CardInfo(cardFaceName, suit, count, order);
-		Poker poker = new Poker(context, cardInfo, getBitmap(resId), cardWidth,
-				cardHeight, cardFaceWidth, cardFaceHeight);
+		Poker poker = new Poker(mQianfenApp, cardInfo, getBitmap(resId),
+				cardWidth, cardHeight, cardFaceWidth, cardFaceHeight);
 		poker.setVisibility(View.GONE);
 		mPokerHashMap.put(cardFaceName, poker);
-		// mPokerList.add(poker);
 	}
 
 	private void storeCardBitmapId() {

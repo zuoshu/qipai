@@ -1,6 +1,5 @@
 package com.oneguy.qipai.game.ai;
 
-import java.util.Collections;
 import java.util.List;
 
 import android.util.Log;
@@ -66,21 +65,24 @@ public class DiscardCombo {
 		if (cards == null || cards.size() == 0
 				|| cards.size() > MAX_CARD_LENGTH) {
 			mAttribute = ATTRIBUTE_NONE;
+			mOrder = Constants.ORDER_NONE;
 		} else {
 			mOrder = cards.get(0).getOrder();
 			mAttribute = attribute;
 		}
-		// Collections.sort(cards);
-		if (mAttribute == ATTRIBUTE_INVALID) {
-			String str = "";
-			for (CardInfo card : cards) {
-				str += card.getName() + "|";
-			}
-			Log.d("DiscardCombo", "invalid:" + str);
-			throw new IllegalArgumentException("牌组不合法");
+	}
 
-		} else if (mAttribute == ATTRIBUTE_NONE) {
+	public DiscardCombo(List<CardInfo> cards, int seat) {
+		int attribute = generateAttribute(cards);
+		mPlayerSeat = seat;
+		this.cards = cards;
+		if (cards == null || cards.size() == 0
+				|| cards.size() > MAX_CARD_LENGTH) {
+			mAttribute = ATTRIBUTE_NONE;
 			mOrder = Constants.ORDER_NONE;
+		} else {
+			mOrder = cards.get(0).getOrder();
+			mAttribute = attribute;
 		}
 	}
 
@@ -103,4 +105,153 @@ public class DiscardCombo {
 	public void setAttribute(int attribute) {
 		mAttribute = attribute;
 	}
+
+	private int generateAttribute(List<CardInfo> cards) {
+		if (cards == null || cards.size() == 0
+				|| cards.size() > MAX_CARD_LENGTH) {
+			return ATTRIBUTE_NONE;
+		}
+		int cardCount = cards.size();
+		mOrder = cards.get(0).getOrder();
+		if (cardCount == 1) {
+			return ATTRIBUTE_SINGLE;
+		} else if (cardCount == 2) {
+			if (cards.get(0).getCount() == cards.get(1).getCount()) {
+				return ATTRIBUTE_PAIR;
+			} else {
+				return ATTRIBUTE_INVALID;
+			}
+		} else if (cardCount == 3) {
+			// 可能是三张也可能是 5 10 k
+			int count0 = cards.get(0).getCount();
+			int count1 = cards.get(1).getCount();
+			int count2 = cards.get(2).getCount();
+			int suit0 = cards.get(0).getSuit();
+			int suit1 = cards.get(1).getSuit();
+			int suit2 = cards.get(2).getSuit();
+			// 三张
+			if (count0 == count1 && count0 == count2) {
+				return ATTRIBUTE_THREE;
+			} else if (count0 == 5 && count1 == 10 && count2 == 13) {
+				if (suit0 == Constants.SUIT_SPADE
+						&& suit1 == Constants.SUIT_SPADE
+						&& suit2 == Constants.SUIT_SPADE) {
+					// 黑桃真510k
+					return ATTRIBUTE_510K_FLUSH_SPADE;
+				} else if (suit0 == Constants.SUIT_HEART
+						&& suit1 == Constants.SUIT_HEART
+						&& suit2 == Constants.SUIT_HEART) {
+					// 红桃真510k
+					return ATTRIBUTE_510K_FLUSH_HEART;
+				} else if (suit0 == Constants.SUIT_CLUB
+						&& suit1 == Constants.SUIT_CLUB
+						&& suit2 == Constants.SUIT_CLUB) {
+					// 梅花真510k
+					return ATTRIBUTE_510K_FLUSH_CLUB;
+				} else if (suit0 == Constants.SUIT_DIAMOND
+						&& suit1 == Constants.SUIT_DIAMOND
+						&& suit2 == Constants.SUIT_DIAMOND) {
+					// 方块真510k
+					return ATTRIBUTE_510K_FLUSH_DIAMOND;
+				} else {
+					// 假510k
+					return ATTRIBUTE_510K_FAKE;
+				}
+			} else {
+				return ATTRIBUTE_INVALID;
+			}
+		} else if (cardCount == 4) {
+			int count0 = cards.get(0).getCount();
+			int count1 = cards.get(1).getCount();
+			int count2 = cards.get(2).getCount();
+			int count3 = cards.get(3).getCount();
+			if (count0 == count1 && count0 == count2 && count0 == count3) {
+				return ATTRIBUTE_FOUR;
+			} else {
+				return ATTRIBUTE_INVALID;
+			}
+		} else if (cardCount == 5) {
+			int count0 = cards.get(0).getCount();
+			int count1 = cards.get(1).getCount();
+			int count2 = cards.get(2).getCount();
+			int count3 = cards.get(3).getCount();
+			int count4 = cards.get(4).getCount();
+			if (count0 == count1 && count0 == count2 && count0 == count3
+					&& count0 == count4) {
+				return ATTRIBUTE_FIVE;
+			} else {
+				return ATTRIBUTE_INVALID;
+			}
+		} else if (cardCount == 6) {
+			int count0 = cards.get(0).getCount();
+			int count1 = cards.get(1).getCount();
+			int count2 = cards.get(2).getCount();
+			int count3 = cards.get(3).getCount();
+			int count4 = cards.get(4).getCount();
+			int count5 = cards.get(5).getCount();
+			if (count0 == count1 && count0 == count2 && count0 == count3
+					&& count0 == count4 && count0 == count5) {
+				return ATTRIBUTE_SIX;
+			} else {
+				return ATTRIBUTE_INVALID;
+			}
+		} else if (cardCount == 7) {
+			int count0 = cards.get(0).getCount();
+			int count1 = cards.get(1).getCount();
+			int count2 = cards.get(2).getCount();
+			int count3 = cards.get(3).getCount();
+			int count4 = cards.get(4).getCount();
+			int count5 = cards.get(5).getCount();
+			int count6 = cards.get(6).getCount();
+			if (count0 == count1 && count0 == count2 && count0 == count3
+					&& count0 == count4 && count0 == count5 && count0 == count6) {
+				return ATTRIBUTE_SEVEN;
+			} else {
+				return ATTRIBUTE_INVALID;
+			}
+		} else if (cardCount == 8) {
+			int count0 = cards.get(0).getCount();
+			int count1 = cards.get(1).getCount();
+			int count2 = cards.get(2).getCount();
+			int count3 = cards.get(3).getCount();
+			int count4 = cards.get(4).getCount();
+			int count5 = cards.get(5).getCount();
+			int count6 = cards.get(6).getCount();
+			int count7 = cards.get(7).getCount();
+			if (count0 == count1 && count0 == count2 && count0 == count3
+					&& count0 == count4 && count0 == count5 && count0 == count6
+					&& count0 == count7) {
+				return ATTRIBUTE_EIGHT;
+			} else {
+				return ATTRIBUTE_INVALID;
+			}
+		}
+		return ATTRIBUTE_INVALID;
+	}
+
+	public boolean equals(List<CardInfo> input) {
+		if (input == null) {
+			return false;
+		}
+		List<CardInfo> thisCards = getCards();
+		List<CardInfo> otherCards = input;
+		if ((thisCards == null && otherCards == null)
+				|| (thisCards.size() == 0 && otherCards.size() == 0)) {
+			return true;
+		}
+		if (thisCards.size() != otherCards.size()) {
+			return false;
+		}
+		// TODO list is ordered,can do it faster!
+		int equalCount = 0;
+		for (CardInfo thisCard : thisCards) {
+			for (CardInfo otherCard : otherCards) {
+				if (thisCard.getName().equals(otherCard.getName())) {
+					equalCount++;
+				}
+			}
+		}
+		return equalCount == thisCards.size();
+	}
+
 }

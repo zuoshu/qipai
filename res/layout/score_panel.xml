@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/lobby_detail_bg"
+    android:background="@drawable/ranking_detail_list_bg"
     android:orientation="vertical"
     android:padding="15dp" >
 

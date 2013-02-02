@@ -14,6 +14,7 @@ public class QianfenActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_qianfen);
+		ResourceManger.getInstance();
 		singlePlay = (Button) findViewById(R.id.singlePlayButton);
 		singlePlay.setOnClickListener(new OnClickListener() {
 
@@ -26,11 +27,4 @@ public class QianfenActivity extends Activity {
 			}
 		});
 	}
-
-	@Override
-	protected void onDestroy() {
-		ResourceManger.getInstance().clear();
-		super.onDestroy();
-	}
-
 }

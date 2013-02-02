@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
+import com.oneguy.qipai.QianfenApplication;
 import com.oneguy.qipai.R;
 import com.oneguy.qipai.ResourceManger;
 import com.oneguy.qipai.game.CardInfo;
@@ -18,7 +19,7 @@ import com.oneguy.qipai.game.Player;
 
 public class Poker extends Sprite implements Comparable<Poker> {
 
-	private static final String TAG = "Card";
+	private static final String TAG = "Poker";
 	private static final int SELECTED_GAP = ResourceManger.getInstance()
 			.getVerticalDimen(R.string.seleceted_gap);
 	private static final PaintFlagsDrawFilter FILTER = new PaintFlagsDrawFilter(
@@ -30,25 +31,27 @@ public class Poker extends Sprite implements Comparable<Poker> {
 	protected int mCardFaceHeight;
 	private CardInfo mCardInfo;
 	private Player mPlayer;
-	private Bitmap mSelectBitmap;
+	private static final Bitmap BITMAP_SELECTED = BitmapFactory.decodeResource(
+			QianfenApplication.getInstance().getResources(),
+			R.drawable.card_selected);
 	private Rect mCardRect;
 	private int selectedY;
 	private int unselectedY;
+	// 是否翻开
+	private boolean mIsFrontFace;
 
 	public Poker(Context context, CardInfo card, Bitmap cardFace, int width,
 			int height, int cardFaceWidth, int cardFaceHeight) {
 		super(context, width, height);
 		mCardInfo = card;
-		// setBackgroundColor(Color.WHITE);
 		setBackgroundResource(R.drawable.lord_card_bg_big);
 		mCardFace = cardFace;
 		mCardFaceWidth = cardFaceWidth;
 		mCardFaceHeight = cardFaceHeight;
 		mCardFaceDestRect = new Rect(0, 0, mCardFaceWidth, mCardFaceHeight);
-		mSelectBitmap = BitmapFactory.decodeResource(context.getResources(),
-				R.drawable.card_selected);
 		mCardRect = new Rect();
 		resetCoordinate();
+		mIsFrontFace = true;
 	}
 
 	@Override
@@ -73,22 +76,6 @@ public class Poker extends Sprite implements Comparable<Poker> {
 	}
 
 	public void setSelected(boolean isSelected) {
-		// boolean changeToSelected = false;
-		// boolean changeToDeselected = false;
-		// if (mIsSelected && !isSelected) {
-		// changeToDeselected = true;
-		// } else if (!mIsSelected && isSelected) {
-		// changeToSelected = true;
-		// }
-		// if (changeToSelected) {
-		// int y = getY();
-		// y -= SELECTED_GAP;
-		// setY(y);
-		// } else if (changeToDeselected) {
-		// int y = getY();
-		// y += SELECTED_GAP;
-		// setY(y);
-		// }
 		mIsSelected = isSelected;
 		if (mIsSelected) {
 			setY(selectedY);
@@ -96,6 +83,10 @@ public class Poker extends Sprite implements Comparable<Poker> {
 			setY(unselectedY);
 		}
 		invalidate();
+	}
+	
+	public boolean isSelected(){
+		return mIsSelected;
 	}
 
 	@Override
@@ -115,14 +106,18 @@ public class Poker extends Sprite implements Comparable<Poker> {
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
-		canvas.setDrawFilter(FILTER);
-		if (mIsSelected) {
-			mCardRect.right = getWidth();
-			mCardRect.bottom = getHeight();
-			canvas.drawBitmap(mSelectBitmap, null, mCardRect, null);
-			Log.d(TAG, "draw select");
+		if (mIsFrontFace) {
+			setBackgroundResource(R.drawable.lord_card_bg_big);
+			canvas.setDrawFilter(FILTER);
+			if (mIsSelected) {
+				mCardRect.right = getWidth();
+				mCardRect.bottom = getHeight();
+				canvas.drawBitmap(BITMAP_SELECTED, null, mCardRect, null);
+			}
+			canvas.drawBitmap(mCardFace, null, mCardFaceDestRect, null);
+		} else {
+			setBackgroundResource(R.drawable.lord_cards_num_bg);
 		}
-		canvas.drawBitmap(mCardFace, null, mCardFaceDestRect, null);
 	}
 
 	public CardInfo getCardInfo() {
@@ -137,6 +132,14 @@ public class Poker extends Sprite implements Comparable<Poker> {
 		this.mPlayer = player;
 	}
 
+	public void setFrontFace(boolean isFrontFace) {
+		boolean changeFace = mIsFrontFace != isFrontFace;
+		mIsFrontFace = isFrontFace;
+		if (changeFace) {
+			invalidate();
+		}
+	}
+
 	// TODO 将逻辑和UI分离
 	@Override
 	public int compareTo(Poker another) {
@@ -147,6 +150,7 @@ public class Poker extends Sprite implements Comparable<Poker> {
 		setVisibility(View.GONE);
 		mIsSelected = false;
 		resetCoordinate();
+		setFrontFace(true);
 	}
 
 	// called when start a new game

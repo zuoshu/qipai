@@ -8,14 +8,12 @@ import android.view.WindowManager;
 import com.oneguy.qipai.game.Player;
 import com.oneguy.qipai.game.Recorder;
 import com.oneguy.qipai.game.ai.AutoPlay;
-import com.oneguy.qipai.game.ai.Judge;
 
 public class QianfenApplication extends Application {
 	private static QianfenApplication mInstance;
 	public static int displayWidth;
 	public static int displayHeight;
 	public static Player[] players;
-	public static Judge judge;
 	public static Recorder recorder;
 	// 托管出牌
 	public static AutoPlay autoPlayer;
@@ -26,7 +24,6 @@ public class QianfenApplication extends Application {
 		mInstance = this;
 		setDisplayInfo();
 		initPlayers();
-		initJudge();
 		initRecorder();
 		initAutoPlayer();
 	}
@@ -55,10 +52,6 @@ public class QianfenApplication extends Application {
 		players[Player.SEAT_RIGHT] = new Player();
 		players[Player.SEAT_UP] = new Player();
 		players[Player.SEAT_LEFT] = new Player();
-	}
-
-	private void initJudge() {
-		judge = new Judge(players);
 	}
 
 	private void initRecorder() {

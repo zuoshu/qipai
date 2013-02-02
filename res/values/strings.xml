@@ -69,11 +69,14 @@
     <!-- 计时器位置 -->
     <string name="left_clock_x_percent">0.1</string>
     <string name="left_clock_y_percent">0.3</string>
-    <string name="bottom_clock_x_percent">0.5</string>
-    <string name="bottom_clock_y_percent">0.4</string>
+    <string name="bottom_clock_x_percent">0.75</string>
+    <string name="bottom_clock_y_percent">0.42</string>
     <string name="right_clock_x_percent">0.9</string>
     <string name="right_clock_y_percent">0.4</string>
     <string name="up_clock_x_percent">0.7</string>
     <string name="up_clock_y_percent">0.1</string>
+    <!-- 出牌 提示 -->
+    <string name="control_panel_x_percent">0.34</string>
+    <string name="control_panel_y_percent">0.57</string>
 
 </resources>

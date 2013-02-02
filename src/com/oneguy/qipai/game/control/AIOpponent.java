@@ -17,9 +17,6 @@ import com.oneguy.qipai.game.ai.DiscardCombo;
 public class AIOpponent extends Opponent {
 
 	public static final String STATUS_TAG = "Opponent_status";
-	// AI出牌延时
-	public static final long AI_DISCARD_DELAY = 1000;
-
 	// 牌组信息，用于洗牌，只保存序号，每个序号对应ResourceManager里面card数组
 	// 洗牌时只要知道序号即可
 	private int[] cards;
@@ -74,7 +71,6 @@ public class AIOpponent extends Opponent {
 		JSONObject playerInfo = new JSONObject();
 		try {
 			playerInfo.put(Constants.SELF_SEQUENCE, sequence);
-
 			playerInfo.put(Constants.SELF_NAME, Constants.DEFAULT_SELF_NAME);
 			playerInfo.put(Constants.RIGHT_NAME, Constants.DEFAULT_RIGHT_NAME);
 			playerInfo.put(Constants.UP_NAME, Constants.DEFAULT_UP_NAME);

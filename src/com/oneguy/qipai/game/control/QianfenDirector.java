@@ -28,10 +28,9 @@ import com.oneguy.qipai.game.Recorder;
 import com.oneguy.qipai.game.ai.AutoPlay;
 import com.oneguy.qipai.game.ai.Director;
 import com.oneguy.qipai.game.ai.DiscardCombo;
-import com.oneguy.qipai.game.ai.DiscardRecord;
-import com.oneguy.qipai.game.ai.Judge;
 import com.oneguy.qipai.view.Clock;
 import com.oneguy.qipai.view.Clock.OnTimeOutListener;
+import com.oneguy.qipai.view.PlayerControlPanel;
 import com.oneguy.qipai.view.Poker;
 import com.oneguy.qipai.view.QianfenStage;
 import com.oneguy.qipai.view.ScorePanel;
@@ -42,9 +41,9 @@ public class QianfenDirector extends Director implements OnClickListener,
 	public static final String TAG = "QianfenDirector";
 	public static final String STATUS_TAG = "director_status";
 	private static final int WAIT_AFTER_ROUND_FINISH = 500;
-	private static final int WAIT_AFTER_DISCARD_FINISH = 500;
+	private static final int WAIT_AFTER_DISCARD_FINISH = 1500;
 	// 出牌超时
-	public static final long PLAY_ACTION_TIME_OUT = 2000;
+	public static final long PLAYER_ACTION_TIME_OUT = 20 * 1000;
 	static final int BOTTOM = 0;
 	static final int RIGHT = 1;
 	static final int UP = 2;
@@ -57,12 +56,12 @@ public class QianfenDirector extends Director implements OnClickListener,
 	private QianfenStage mStage;
 	private List<Poker> mPokers;
 	private AutoPlay mAI;
-	private Judge mJudge;
 	private Recorder mRecorder;
 	// UI refs
 	private Button mStartButton;
 	private Clock mClock;
 	private PlayerTimeOutListener mPlayerTimeOutListener;
+	private PlayerControlPanel mPlayerControlPanel;
 	// 托管
 	private boolean mAutoPlay = false;
 	private ScorePanel mScorePanel;
@@ -88,7 +87,6 @@ public class QianfenDirector extends Director implements OnClickListener,
 		getActivity().setContentView(mStage);
 		mQianfen = QianfenApplication.getInstance();
 		mPlayers = QianfenApplication.players;
-		mJudge = QianfenApplication.judge;
 		mRecorder = QianfenApplication.recorder;
 		mAI = QianfenApplication.autoPlayer;
 		mPlayerTimeOutListener = new PlayerTimeOutListener(Player.SEAT_NONE);
@@ -104,6 +102,15 @@ public class QianfenDirector extends Director implements OnClickListener,
 				mStage.addView(p);
 			}
 		}
+		initStartButton();
+		initClock();
+		initScorePanel();
+		initPlayerInfoView();
+		initPassLable();
+		initPlayerControlPanel();
+	}
+
+	private void initStartButton() {
 		// 开始按钮
 		mStartButton = new Button(mActivity);
 		LayoutParams lp = new LayoutParams(LayoutParams.WRAP_CONTENT,
@@ -123,34 +130,122 @@ public class QianfenDirector extends Director implements OnClickListener,
 		});
 		mStartButton.setLayoutParams(lp);
 		mStage.addView(mStartButton);
+	}
+
+	private void initClock() {
 		// 计时器
 		mClock = new Clock(mActivity);
-		lp = new LayoutParams(LayoutParams.WRAP_CONTENT,
+		LayoutParams lp = new LayoutParams(LayoutParams.WRAP_CONTENT,
 				LayoutParams.WRAP_CONTENT);
 		mClock.setLayoutParams(lp);
 		mClock.setVisibility(View.GONE);
 		mStage.addView(mClock);
+	}
+
+	private void initScorePanel() {
 		// 记分板
 		mScorePanel = new ScorePanel();
 		mScorePanel.setButtonsListener(this);
 		View scoreView = mScorePanel.getView();
-		lp = new LayoutParams(LayoutParams.WRAP_CONTENT,
+		LayoutParams lp = new LayoutParams(LayoutParams.WRAP_CONTENT,
 				LayoutParams.WRAP_CONTENT);
 		lp.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
 		scoreView.setLayoutParams(lp);
 		scoreView.setVisibility(View.GONE);
 		mStage.addView(scoreView);
-		putPlayerViewOntoStage();
-		addPassLable();
+	}
+
+	private void initPlayerInfoView() {
+		// player0自己 坐在下面
+		LayoutParams lp = new LayoutParams(LayoutParams.WRAP_CONTENT,
+				LayoutParams.WRAP_CONTENT);
+		lp.leftMargin = mResourceManager.player0InfoMarginLeft;
+		lp.topMargin = mResourceManager.player0InfoMarginTop;
+		mStage.addView(mPlayers[0].getInfoView(), lp);
+
+		// player1 右边
+		lp = new LayoutParams(LayoutParams.WRAP_CONTENT,
+				LayoutParams.WRAP_CONTENT);
+		lp.leftMargin = mResourceManager.player1InfoMarginLeft;
+		lp.topMargin = mResourceManager.player1InfoMarginTop;
+		mStage.addView(mPlayers[1].getInfoView(), lp);
+
+		// player2 上面
+		lp = new LayoutParams(LayoutParams.WRAP_CONTENT,
+				LayoutParams.WRAP_CONTENT);
+		lp.leftMargin = mResourceManager.player2InfoMarginLeft;
+		lp.topMargin = mResourceManager.player2InfoMarginTop;
+		mStage.addView(mPlayers[2].getInfoView(), lp);
+
+		// player3 左边
+		lp = new LayoutParams(LayoutParams.WRAP_CONTENT,
+				LayoutParams.WRAP_CONTENT);
+		lp.leftMargin = mResourceManager.player3InfoMarginLeft;
+		lp.topMargin = mResourceManager.player3InfoMarginTop;
+		mStage.addView(mPlayers[3].getInfoView(), lp);
+	}
+
+	private void initPassLable() {
+		// bottom
+		LayoutParams lp = new LayoutParams(LayoutParams.WRAP_CONTENT,
+				LayoutParams.WRAP_CONTENT);
+		lp.leftMargin = mResourceManager
+				.getHorizontalDimen(R.string.bottom_pass_lable_x);
+		lp.topMargin = mResourceManager
+				.getVerticalDimen(R.string.bottom_pass_lable_y);
+		mStage.addView(mPlayers[Player.SEAT_BOTTOM].getPassLable(), lp);
+
+		// right
+		lp = new LayoutParams(LayoutParams.WRAP_CONTENT,
+				LayoutParams.WRAP_CONTENT);
+		lp.leftMargin = mResourceManager
+				.getHorizontalDimen(R.string.right_pass_lable_x);
+		lp.topMargin = mResourceManager
+				.getVerticalDimen(R.string.right_pass_lable_y);
+		mStage.addView(mPlayers[Player.SEAT_RIGHT].getPassLable(), lp);
+
+		// up
+		lp = new LayoutParams(LayoutParams.WRAP_CONTENT,
+				LayoutParams.WRAP_CONTENT);
+		lp.leftMargin = mResourceManager
+				.getHorizontalDimen(R.string.up_pass_lable_x);
+		lp.topMargin = mResourceManager
+				.getVerticalDimen(R.string.up_pass_lable_y);
+		mStage.addView(mPlayers[Player.SEAT_UP].getPassLable(), lp);
+
+		// left
+		lp = new LayoutParams(LayoutParams.WRAP_CONTENT,
+				LayoutParams.WRAP_CONTENT);
+		lp.leftMargin = mResourceManager
+				.getHorizontalDimen(R.string.left_pass_lable_x);
+		lp.topMargin = mResourceManager
+				.getVerticalDimen(R.string.left_pass_lable_y);
+		mStage.addView(mPlayers[Player.SEAT_LEFT].getPassLable(), lp);
+	}
+
+	private void initPlayerControlPanel() {
+		mPlayerControlPanel = new PlayerControlPanel();
+		mPlayerControlPanel.setDiscardOnClickListener(this);
+		mPlayerControlPanel.setHintOnClickListener(this);
+		LayoutParams lp = new LayoutParams(LayoutParams.WRAP_CONTENT,
+				LayoutParams.WRAP_CONTENT);
+		lp.leftMargin = mResourceManager
+				.getHorizontalDimen(R.string.control_panel_x_percent);
+		lp.topMargin = mResourceManager
+				.getVerticalDimen(R.string.control_panel_y_percent);
+		View controlView = mPlayerControlPanel.getView();
+		controlView.setVisibility(View.GONE);
+		mStage.addView(controlView, lp);
 	}
 
 	@Override
 	public void onPause() {
-
+		// TODO
 	}
 
 	@Override
 	public void onStop() {
+		deployEvent(Event.TYPE_D_PLAYER_QUIT);
 		reset();
 		mStage.removeAllViews();
 	}
@@ -207,13 +302,17 @@ public class QianfenDirector extends Director implements OnClickListener,
 				// 对于每轮出牌的计算和服务器出现不一致，以服务器为准！
 				mAI.setWhoIsFirst(seat3);
 			}
+			mPlayers[seat3].removeDiscard();
+			List<DiscardCombo> discardList = mAI.pickHintList();
 			// 如果是自己出牌并且托管，则启动自动出牌
 			if (seat3 == Player.SEAT_SELF) {
-				DiscardCombo discard = mAI.discard();
 				// 自动过牌
-				if (discard.getArrtibute() == DiscardCombo.ATTRIBUTE_PASS) {
+				if (discardList == null || discardList.size() == 0) {
+					DiscardCombo discard = new DiscardCombo(seat3);
+					discard.setAttribute(DiscardCombo.ATTRIBUTE_PASS);
 					sendEventMessage(Event.TYPE_C_DISCARD, discard);
 				} else if (!mAutoPlay) {
+					mPlayerControlPanel.show();
 					setClock(mAI.getInActionPlayerSeat());
 				} else {
 					deployEvent(Event.TYPE_D_WAIT_PLAYER_DISCARD, seat3);
@@ -249,6 +348,7 @@ public class QianfenDirector extends Director implements OnClickListener,
 				}
 				Log.d(TAG, str);
 			}
+			mPlayerControlPanel.hide();
 			if (discard.getArrtibute() == DiscardCombo.ATTRIBUTE_PASS) {
 				playerPass(discard);
 			} else {
@@ -270,10 +370,7 @@ public class QianfenDirector extends Director implements OnClickListener,
 			}
 			// 单机版只托管一轮
 			setAutoPlay(false);
-			if (mAI.isOneRoundFinish()) {
-				updateScore();
-				clearLastRoundDisacrd();
-			}
+			mAI.resetHintList();
 			if (mPlayers[seat4].isRunout()) {
 				onPlayerRunout(seat4);
 			}
@@ -281,6 +378,10 @@ public class QianfenDirector extends Director implements OnClickListener,
 				onGameFinish();
 			} else {
 				mAI.takeTurns();
+				if (mAI.isOneRoundFinish()) {
+					updateScore();
+					clearLastRoundDisacrd();
+				}
 				waitDiscard();
 			}
 			break;
@@ -328,24 +429,11 @@ public class QianfenDirector extends Director implements OnClickListener,
 
 	private void clearLastRoundDisacrd() {
 		// 清除上一轮出的牌
-		DiscardRecord[] records = mRecorder.getLastRoundRecord();
-		if (records == null) {
-			return;
-		}
-		for (DiscardRecord record : records) {
-			List<Poker> pokers = mResourceManager.getPokers(record
-					.getDiscardCombo().getCards());
-			if (pokers == null || pokers.size() == 0) {
-				continue;
-			}
-			for (Poker poker : pokers) {
-				poker.setVisibility(View.GONE);
-				poker.postInvalidate();
-			}
-		}
 		for (Player player : mPlayers) {
 			player.hidePassLable();
+			player.removeDiscard();
 		}
+		mRecorder.clearLastRoundRecord();
 	}
 
 	private void updateScore() {
@@ -402,75 +490,6 @@ public class QianfenDirector extends Director implements OnClickListener,
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
-
-	}
-
-	private void putPlayerViewOntoStage() {
-		// player0自己 坐在下面
-		LayoutParams lp = new LayoutParams(LayoutParams.WRAP_CONTENT,
-				LayoutParams.WRAP_CONTENT);
-		lp.leftMargin = mResourceManager.player0InfoMarginLeft;
-		lp.topMargin = mResourceManager.player0InfoMarginTop;
-		getStage().addView(mPlayers[0].getInfoView(), lp);
-
-		// player1 右边
-		lp = new LayoutParams(LayoutParams.WRAP_CONTENT,
-				LayoutParams.WRAP_CONTENT);
-		lp.leftMargin = mResourceManager.player1InfoMarginLeft;
-		lp.topMargin = mResourceManager.player1InfoMarginTop;
-		getStage().addView(mPlayers[1].getInfoView(), lp);
-
-		// player2 上面
-		lp = new LayoutParams(LayoutParams.WRAP_CONTENT,
-				LayoutParams.WRAP_CONTENT);
-		lp.leftMargin = mResourceManager.player2InfoMarginLeft;
-		lp.topMargin = mResourceManager.player2InfoMarginTop;
-		getStage().addView(mPlayers[2].getInfoView(), lp);
-
-		// player3 左边
-		lp = new LayoutParams(LayoutParams.WRAP_CONTENT,
-				LayoutParams.WRAP_CONTENT);
-		lp.leftMargin = mResourceManager.player3InfoMarginLeft;
-		lp.topMargin = mResourceManager.player3InfoMarginTop;
-		getStage().addView(mPlayers[3].getInfoView(), lp);
-	}
-
-	private void addPassLable() {
-		// bottom
-		LayoutParams lp = new LayoutParams(LayoutParams.WRAP_CONTENT,
-				LayoutParams.WRAP_CONTENT);
-		lp.leftMargin = mResourceManager
-				.getHorizontalDimen(R.string.bottom_pass_lable_x);
-		lp.topMargin = mResourceManager
-				.getVerticalDimen(R.string.bottom_pass_lable_y);
-		getStage().addView(mPlayers[Player.SEAT_BOTTOM].getPassLable(), lp);
-
-		// right
-		lp = new LayoutParams(LayoutParams.WRAP_CONTENT,
-				LayoutParams.WRAP_CONTENT);
-		lp.leftMargin = mResourceManager
-				.getHorizontalDimen(R.string.right_pass_lable_x);
-		lp.topMargin = mResourceManager
-				.getVerticalDimen(R.string.right_pass_lable_y);
-		getStage().addView(mPlayers[Player.SEAT_RIGHT].getPassLable(), lp);
-
-		// up
-		lp = new LayoutParams(LayoutParams.WRAP_CONTENT,
-				LayoutParams.WRAP_CONTENT);
-		lp.leftMargin = mResourceManager
-				.getHorizontalDimen(R.string.up_pass_lable_x);
-		lp.topMargin = mResourceManager
-				.getVerticalDimen(R.string.up_pass_lable_y);
-		getStage().addView(mPlayers[Player.SEAT_UP].getPassLable(), lp);
-
-		// left
-		lp = new LayoutParams(LayoutParams.WRAP_CONTENT,
-				LayoutParams.WRAP_CONTENT);
-		lp.leftMargin = mResourceManager
-				.getHorizontalDimen(R.string.left_pass_lable_x);
-		lp.topMargin = mResourceManager
-				.getVerticalDimen(R.string.left_pass_lable_y);
-		getStage().addView(mPlayers[Player.SEAT_LEFT].getPassLable(), lp);
 	}
 
 	private void clearPlayerCards() {
@@ -503,6 +522,13 @@ public class QianfenDirector extends Director implements OnClickListener,
 	}
 
 	private void putHandCardsOntoStage() {
+		// for(Player p:mPlayers){
+		// p.showCards();
+		// p.layoutCards();
+		// if(p.getSeat()!=Player.SEAT_SELF){
+		// p.setHandCardFronFace(false);
+		// }
+		// }
 		// show players card only
 		mPlayers[Player.SEAT_SELF].showCards();
 		mPlayers[Player.SEAT_SELF].layoutCards();
@@ -565,7 +591,7 @@ public class QianfenDirector extends Director implements OnClickListener,
 		mClock.setVisibility(View.VISIBLE);
 
 		mPlayerTimeOutListener.setPlayerSeat(inActionPlayerSeat);
-		mClock.start(mPlayerTimeOutListener, PLAY_ACTION_TIME_OUT);
+		mClock.start(mPlayerTimeOutListener, PLAYER_ACTION_TIME_OUT);
 	}
 
 	public Player[] getPlayers() {
@@ -591,14 +617,35 @@ public class QianfenDirector extends Director implements OnClickListener,
 
 	@Override
 	public void onClick(View v) {
-		switch (v.getId()) {
-
+		int seat = mAI.getInActionPlayerSeat();
+		if (v == mStartButton) {
+			sendEventMessage(Event.TYPE_D_WAIT_SHUFFLE);
+			mStartButton.setVisibility(View.GONE);
+		} else {
+			switch (v.getId()) {
+			case R.id.btnDiscard:
+				List<CardInfo> cards = mPlayers[seat].getSelectedCards();
+				DiscardCombo discard = mAI.getValidDiscard(cards);
+				if (discard == null
+						|| discard.getArrtibute() == DiscardCombo.ATTRIBUTE_INVALID
+						|| discard.getArrtibute() == DiscardCombo.ATTRIBUTE_NONE) {
+					Toast.makeText(mQianfen, "不能这样出牌！", Toast.LENGTH_SHORT)
+							.show();
+				} else {
+					mClock.cancleTiming();
+					mClock.setVisibility(View.GONE);
+					sendEventMessage(Event.TYPE_C_DISCARD, discard);
+				}
+				break;
+			case R.id.btnHint:
+				mPlayers[seat].deselectAllCards();
+				mPlayers[seat].selectDiscard(mAI.pickHint());
+				break;
+			}
 		}
-
 	}
 
 	class PlayerTimeOutListener implements OnTimeOutListener {
-
 		// 定时器监听的玩家座位
 		private int playerSeat;
 
@@ -645,5 +692,4 @@ public class QianfenDirector extends Director implements OnClickListener,
 		mRecorder.reset();
 		mScorePanel.reset();
 	}
-
 }

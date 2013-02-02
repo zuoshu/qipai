@@ -23,6 +23,7 @@ public class GameActivity extends Activity {
 			mDirector = new QianfenDirector(this, Director.PLAY_WITH_HUMAN);
 		}
 		mQianfenStage = new QianfenStage(this);
+		mQianfenStage.setBackgroundResource(R.drawable.common_bg_normal);
 		mDirector.setStage(mQianfenStage);
 		mDirector.onStart();
 	}
@@ -32,6 +33,11 @@ public class GameActivity extends Activity {
 		super.onDestroy();
 		mDirector.onStop();
 	}
-	
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		mDirector.onPause();
+	}
 
 }

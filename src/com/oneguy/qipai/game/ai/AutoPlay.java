@@ -22,10 +22,13 @@ public class AutoPlay {
 	private int mPlayerSeatInAction;
 	private Player[] mPlayers;
 	private Recorder mRecorder;
+	private List<DiscardCombo> mDiscardHintList;
+	private int mCurrentHintIndex;
 
 	public AutoPlay(Recorder recorder, Player[] players) {
 		mRecorder = recorder;
 		mPlayers = players;
+		mDiscardHintList = null;
 	}
 
 	public AutoPlay(QianfenDirector director) {
@@ -62,8 +65,7 @@ public class AutoPlay {
 	}
 
 	public boolean isOneRoundFinish() {
-		return mRecorder.getCurrentSequence() == 0
-				&& mRecorder.getCurrentRound() > 0;
+		return mRecorder.isOneRoundFinish();
 	}
 
 	private int pickStartOfNewRound() {
@@ -82,7 +84,10 @@ public class AutoPlay {
 	}
 
 	public DiscardCombo discard() {
-		List<DiscardCombo> discardList = pickDiscardList();
+		if (mDiscardHintList == null) {
+			mDiscardHintList = pickDiscardList();
+		}
+		List<DiscardCombo> discardList = mDiscardHintList;
 		DiscardCombo discard = null;
 		if (discardList == null || discardList.size() == 0) {
 			// pass
@@ -197,12 +202,14 @@ public class AutoPlay {
 
 	private void pickPair(int seat, List<Poker> handCard,
 			DiscardCombo lastDiscard, List<DiscardCombo> result) {
-		// pickSame(seat, handCard, lastDiscard, result, 2);
+		pickSame(seat, handCard, lastDiscard, result, 2,
+				DiscardCombo.ATTRIBUTE_PAIR);
 	}
 
 	private void pickThree(int seat, List<Poker> handCard,
 			DiscardCombo lastDiscard, List<DiscardCombo> result) {
-		// pickSame(seat, handCard, lastDiscard, result, 3);
+		pickSame(seat, handCard, lastDiscard, result, 3,
+				DiscardCombo.ATTRIBUTE_THREE);
 	}
 
 	private void pickFake510K(int seat, List<Poker> handCard,
@@ -243,7 +250,8 @@ public class AutoPlay {
 
 	private void pickFour(int seat, List<Poker> handCard,
 			DiscardCombo lastDiscard, List<DiscardCombo> result) {
-		// pickSame(seat, handCard, lastDiscard, result, 4);
+		pickSame(seat, handCard, lastDiscard, result, 4,
+				DiscardCombo.ATTRIBUTE_FOUR);
 	}
 
 	private void pickDiamond510K(int seat, List<Poker> handCard,
@@ -294,7 +302,7 @@ public class AutoPlay {
 		if (listOf5 == null || listOf5.size() == 0) {
 			return;
 		}
-		// combine
+		// multiply
 		for (CardInfo pokerK : listOfK) {
 			for (CardInfo poker10 : listOf10) {
 				for (CardInfo poker5 : listOf5) {
@@ -336,7 +344,12 @@ public class AutoPlay {
 			DiscardCombo lastDiscard, List<DiscardCombo> result, int sameSize,
 			int att) {
 		ArrayList<CardInfo> cards = new ArrayList<CardInfo>();
-		int lastOrder = lastDiscard.getOrder();
+		int lastOrder;
+		if (lastDiscard.getArrtibute() == att) {
+			lastOrder = lastDiscard.getOrder();
+		} else {
+			lastOrder = 0;
+		}
 		int baseCount = 0;
 		int sameCardSize = 0;
 		for (int i = 0; i < handCard.size() - sameSize + 1; i++) {
@@ -400,21 +413,49 @@ public class AutoPlay {
 		return result;
 	}
 
-	/**
-	 * 检查玩家出牌是否合法
-	 * 
-	 * @param seat
-	 *            玩家座次
-	 * @param cards
-	 *            要出的牌在手牌的位置
-	 * @return 合法true 不合法false
-	 */
-	public boolean isShowCardsValid(int seat, int[] cards) {
-		return true;
-	}
-
 	public void reset() {
-
+		resetHintList();
 	}
 
+	public DiscardCombo pickHint() {
+		DiscardCombo discard = null;
+		if (mDiscardHintList == null || mDiscardHintList.size() == 0) {
+			discard = new DiscardCombo(mPlayerSeatInAction);
+			discard.setAttribute(DiscardCombo.ATTRIBUTE_PASS);
+		} else {
+			discard = mDiscardHintList.get(mCurrentHintIndex);
+			mCurrentHintIndex = (mCurrentHintIndex + 1)
+					% mDiscardHintList.size();
+		}
+		return discard;
+	}
+
+	public List<DiscardCombo> pickHintList() {
+		mDiscardHintList = pickDiscardList();
+		mCurrentHintIndex = 0;
+		return mDiscardHintList;
+	}
+
+	public void resetHintList() {
+		if (mDiscardHintList != null) {
+			mDiscardHintList.clear();
+		}
+		mDiscardHintList = null;
+		mCurrentHintIndex = 0;
+	}
+
+	public DiscardCombo getValidDiscard(List<CardInfo> cards) {
+		if (cards == null || cards.size() == 0) {
+			return null;
+		}
+		if (mDiscardHintList == null || mDiscardHintList.size() == 0) {
+			return null;
+		}
+		for (DiscardCombo hint : mDiscardHintList) {
+			if (hint.equals(cards)) {
+				return hint;
+			}
+		}
+		return null;
+	}
 }
