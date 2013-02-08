@@ -1,23 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:background="@drawable/ranking_detail_list_bg"
+    android:background="@drawable/result_bg"
     android:orientation="vertical"
-    android:padding="15dp" >
-
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical" >
-
-        <TextView
-            android:id="@+id/score_title"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="@string/score_title" />
-    </LinearLayout>
+    android:paddingBottom="10dp"
+    android:paddingLeft="30dp"
+    android:paddingRight="30dp"
+    android:paddingTop="40dp" >
 
     <LinearLayout
         android:layout_width="fill_parent"
@@ -33,7 +23,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_weight="2"
                 android:gravity="left"
                 android:text="玩家" />
 
@@ -85,7 +75,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_weight="2"
                 android:gravity="left"
                 android:text="得分" />
 
@@ -137,7 +127,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_weight="2"
                 android:gravity="left"
                 android:text="名次" />
 
@@ -178,7 +168,8 @@
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
+        android:layout_marginTop="30dp"
+        android:gravity="bottom|center_horizontal"
         android:orientation="horizontal" >
 
         <Button
@@ -189,9 +180,9 @@
 
         <Button
             android:id="@+id/btnQuit"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="quit" />
+            android:layout_width="46dp"
+            android:layout_height="31dp"
+            android:background="@drawable/ranking_return" />
     </LinearLayout>
 
 </LinearLayout>

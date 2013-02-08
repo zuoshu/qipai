@@ -26,11 +26,11 @@
 
     <Button
         android:id="@+id/singlePlayButton"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
+        android:layout_width="162dp"
+        android:layout_height="42dp"
+        android:layout_alignParentRight="true"
         android:layout_below="@+id/loginButton"
-        android:layout_marginLeft="@dimen/button_margin_left"
         android:layout_marginRight="@dimen/button_margin_right"
-        android:text="@string/single_play" />
+        android:background="@drawable/single_play" />
 
 </RelativeLayout>

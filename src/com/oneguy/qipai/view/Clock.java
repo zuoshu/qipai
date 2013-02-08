@@ -36,7 +36,7 @@ public class Clock extends Button implements Timer {
 				}
 			}
 		};
-		setBackgroundResource(R.drawable.lordhl_clock_bg);
+		setBackgroundResource(R.drawable.clock_bg);
 	}
 
 	/**

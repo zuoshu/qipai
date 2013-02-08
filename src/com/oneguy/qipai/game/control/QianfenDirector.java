@@ -40,8 +40,7 @@ public class QianfenDirector extends Director implements OnClickListener,
 		ScorePanelButtonClickListener {
 	public static final String TAG = "QianfenDirector";
 	public static final String STATUS_TAG = "director_status";
-	private static final int WAIT_AFTER_ROUND_FINISH = 500;
-	private static final int WAIT_AFTER_DISCARD_FINISH = 1500;
+	private static final int WAIT_AFTER_DISCARD_FINISH = 500;
 	// 出牌超时
 	public static final long PLAYER_ACTION_TIME_OUT = 20 * 1000;
 	static final int BOTTOM = 0;
