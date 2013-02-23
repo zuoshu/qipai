@@ -21,12 +21,8 @@ public final class ResourceManger {
 	public static final String TAG = "ResourceManger";
 	private volatile static ResourceManger mInstance = null;
 	private Resources mResources;
-	// Default memory cache size
-	private static final int DEFAULT_MEM_CACHE_SIZE = 1024 * 1024 * 5; // 5MB
-	// private LruCache<String, Bitmap> mMemCache;
 	private HashMap<String, Integer> mCardFaceResMap;
 	private QianfenApplication mQianfenApp;
-	// private boolean isImageCached;
 
 	// 屏幕信息
 	public int displayWidth;

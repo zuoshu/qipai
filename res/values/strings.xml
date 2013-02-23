@@ -37,8 +37,8 @@
     <string name="start_button_margin_top_percent">0.63</string>
     <string name="cards_horizontal_max_spacing">0.03</string>
     <string name="cards_vertical_max_spacing">0.03</string>
-    <string name="bottom_and_up_cards_start_x_percent">0.25</string>
-    <string name="bottom_and_up_cards_end_x_percent">0.9</string>
+    <string name="bottom_and_up_cards_start_x_percent">0.15</string>
+    <string name="bottom_and_up_cards_end_x_percent">0.98</string>
     <string name="bottom_cards_y_percent">0.85</string>
     <string name="up_cards_y_percent">0.05</string>
     <string name="left_and_right_cards_y_percent">0.5</string>

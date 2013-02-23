@@ -346,5 +346,6 @@ public class Player {
 		setScore(0);
 		setName("");
 		clearCards();
+		hidePassLable();
 	}
 }

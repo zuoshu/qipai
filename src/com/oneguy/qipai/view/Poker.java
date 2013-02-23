@@ -8,6 +8,7 @@ import android.graphics.Paint;
 import android.graphics.PaintFlagsDrawFilter;
 import android.graphics.Rect;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -39,6 +40,8 @@ public class Poker extends Sprite implements Comparable<Poker> {
 	private int unselectedY;
 	// 是否翻开
 	private boolean mIsFrontFace;
+	private static Poker mLastTouchPoker;
+	private static boolean mSelectWhenTouch;
 
 	public Poker(Context context, CardInfo card, Bitmap cardFace, int width,
 			int height, int cardFaceWidth, int cardFaceHeight) {
@@ -84,9 +87,15 @@ public class Poker extends Sprite implements Comparable<Poker> {
 		}
 		invalidate();
 	}
-	
-	public boolean isSelected(){
+
+	public boolean isSelected() {
 		return mIsSelected;
+	}
+
+	@Override
+	public boolean dispatchTouchEvent(MotionEvent event) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 	@Override
@@ -97,10 +106,28 @@ public class Poker extends Sprite implements Comparable<Poker> {
 		}
 		switch (event.getAction()) {
 		case MotionEvent.ACTION_DOWN:
-			setSelected(!mIsSelected);
+			mLastTouchPoker = this;
+			mSelectWhenTouch = !isSelected();
+			setSelected(mSelectWhenTouch);
+			break;
+		case MotionEvent.ACTION_MOVE:
+			if (mLastTouchPoker != this) {
+				mLastTouchPoker = this;
+				setSelected(mSelectWhenTouch);
+			}
+			break;
+		case MotionEvent.ACTION_UP:
+			mLastTouchPoker = null;
+			mSelectWhenTouch = true;
 			break;
 		}
+		Log.d("poker", "onTouchEvent " + event.getAction() + ":" + event.getX()
+				+ ":" + event.getY());
 		return true;
+	}
+
+	public boolean contains(float x, float y) {
+		return (getLeft() <= x && x <= getRight() && getTop() <= y && y <= getBottom());
 	}
 
 	@Override
@@ -158,4 +185,5 @@ public class Poker extends Sprite implements Comparable<Poker> {
 		unselectedY = 0;
 		selectedY = 0;
 	}
+
 }

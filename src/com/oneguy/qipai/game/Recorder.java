@@ -95,30 +95,9 @@ public class Recorder {
 	 */
 	public ArrayList<DiscardRecord> getLastRoundRecord() {
 		return mLastRoundRecords;
-		// int playerCount = getCurrentPlayerCount();
-		// int size = mRecords.size();
-		// if (size < playerCount) {
-		// return null;
-		// }
-		// DiscardRecord[] data = new DiscardRecord[playerCount];
-		// for (int i = 0; i < playerCount; i++) {
-		// data[i] = mRecords.get(size - playerCount + i);
-		// }
-		// return data;
 	}
 
 	public int countLastRoundScore() {
-		// int playerCount = getCurrentPlayerCount();
-		// int score = 0;
-		// int size = mLastRoundRecords.size();
-		// if (size < playerCount) {
-		// return score;
-		// }
-		// for (int i = 0; i < playerCount; i++) {
-		// score += countDiscardRecordScore(mRecords.get(size - playerCount
-		// + i));
-		// }
-		// return score;
 		int score = 0;
 		int size = mLastRoundRecords.size();
 		if (size <= 0) {
@@ -162,13 +141,6 @@ public class Recorder {
 	}
 
 	public DiscardRecord getLastRecordNotPass() {
-		// for (int i = mRecords.size() - 1; i >= 0; i--) {
-		// if (mRecords.get(i).getDiscardCombo().getArrtibute() !=
-		// DiscardCombo.ATTRIBUTE_PASS) {
-		// return mRecords.get(i);
-		// }
-		// }
-		// return null;
 		for (int i = mLastRoundRecords.size() - 1; i >= 0; i--) {
 			if (mLastRoundRecords.get(i).getDiscardCombo().getArrtibute() != DiscardCombo.ATTRIBUTE_PASS) {
 				return mLastRoundRecords.get(i);

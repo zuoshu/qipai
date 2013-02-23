@@ -2,7 +2,6 @@ package com.oneguy.qipai;
 
 import android.app.Application;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.WindowManager;
 
 import com.oneguy.qipai.game.Player;
@@ -41,9 +40,6 @@ public class QianfenApplication extends Application {
 				.getDefaultDisplay().getMetrics(dm);
 		displayWidth = Math.max(dm.widthPixels, dm.heightPixels);
 		displayHeight = Math.min(dm.widthPixels, dm.heightPixels);
-		if (BuildConfig.DEBUG) {
-			Log.d("ScreenInfo", dm.toString());
-		}
 	}
 
 	private void initPlayers() {
